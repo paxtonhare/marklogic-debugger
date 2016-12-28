@@ -1,0 +1,74 @@
+buildscript {
+  ext {
+    springBootVersion = '1.4.0.RELEASE'
+  }
+  repositories {
+    jcenter()
+    maven {url 'http://developer.marklogic.com/maven2/'}
+  }
+  dependencies {
+    classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+  }
+}
+
+plugins {
+    id "java"
+}
+
+apply plugin: 'spring-boot'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+  mavenLocal()
+  jcenter()
+}
+
+dependencies {
+  // Main Boot library for running a webapp
+  compile("org.springframework.boot:spring-boot-starter:${springBootVersion}")
+  compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+  compile("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
+  // compile("org.springframework.boot:spring-boot-starter-websocket:${springBootVersion}")
+  compile("org.springframework.boot:spring-boot-starter-thymeleaf:${springBootVersion}")
+  compile('com.marklogic:java-client-api:3.0.5')
+  compile('com.marklogic:ml-javaclient-util:2.9.1')
+  compile('commons-io:commons-io:2.4')
+
+  // Optional Boot library - see https://docs.spring.io/spring-boot/docs/current/reference/html/using-boot-devtools.html
+  compile("org.springframework.boot:spring-boot-devtools:${springBootVersion}")
+
+  compile("com.marklogic:marklogic-spring-web:1.0")
+}
+
+// task npmInstallUI(type:Exec) {
+//   workingDir '.'
+//   commandLine 'npm', 'install'
+// }
+
+// task buildUI(type:Exec) {
+//   workingDir '.'
+//   commandLine 'npm', 'run', 'build.prod'
+//   dependsOn tasks.npmInstallUI
+// }
+
+// task watchUI(type:Exec) {
+//   workingDir '.'
+//   commandLine 'npm', 'run', 'watch'
+//   dependsOn tasks.npmInstallUI
+// }
+
+// Tell Spring Boot, when run by Gradle, to watch the resources directory
+bootRun {
+  addResources = true
+  environment 'spring.profiles.active', 'dev'
+}
+
+// processResources.dependsOn buildUI
+
+// See http://docs.spring.io/spring-boot/docs/current/reference/html/deployment-install.html
+springBoot {
+  executable = true
+  mainClass = "com.marklogic.debugger.App"
+}

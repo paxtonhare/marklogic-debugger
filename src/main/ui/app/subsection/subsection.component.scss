@@ -1,0 +1,22 @@
+.title {
+  background-color: #f3f3f3;
+  padding: 2px;
+  border-bottom: 1px solid #ccc;
+  cursor: default;
+
+  mdl-icon {
+    font-size: 16px;
+    transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    transition: transform 0.125s ease-in-out;
+    -webkit-transition: -webkit-transform 0.125s ease-in-out;
+
+  }
+
+  &.collapsed {
+    mdl-icon {
+      transform: rotate(-90deg);
+      -webkit-transform: rotate(-90deg);
+    }
+  }
+}

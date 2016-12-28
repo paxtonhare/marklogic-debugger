@@ -1,0 +1,30 @@
+<ul class="filetree" *ngIf="isRoot && files">
+  <li root>
+    <div class="entry" (click)="entryClicked(files)">
+      <i class="fa" [ngClass]="getEntryIcon(files)"></i>
+      <p>{{files.name}}</p>
+    </div>
+    <!-- <template ngFor let-child [ngForOf]="files.children"> -->
+      <app-file-browser
+        *ngIf="files && files.children"
+        [files]="files"
+        [isRoot]="false"
+        [currentChild]="currentChild"
+        (fileShown)="entryClicked($event)"></app-file-browser>
+    <!-- </template> -->
+  </li>
+</ul>
+<ul class="filetree" *ngIf="!isRoot && files && files.children">
+  <li *ngFor="let child of files.children" [ngClass]="{ 'active': isSelected(child)}">
+    <div class="entry" (click)="entryClicked(child)">
+      <i class="fa" [ngClass]="getEntryIcon(child)"></i>
+      <p>{{child.name}}</p>
+    </div>
+    <app-file-browser
+      *ngIf="child && child.children && !child.collapsed"
+      [files]="child"
+      [isRoot]="false"
+      [currentChild]="currentChild"
+      (fileShown)="entryClicked($event)"></app-file-browser>
+  </li>
+</ul>

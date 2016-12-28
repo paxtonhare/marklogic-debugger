@@ -1,0 +1,143 @@
+<mdl-layout mdl-layout-fixed-header mdl-layout-header-seamed>
+  <mdl-layout-header>
+    <mdl-layout-header-row>
+      <!--<button mdl-button #appsButton="mdlButton" (click)="appsMenu.toggle($event, appsButton)" mdl-button-type="icon" mdl-ripple><mdl-icon>apps</mdl-icon></button>
+      <mdl-menu #appsMenu="mdlMenu" mdl-menu-position="bottom-left">
+        <mdl-menu-item mdl-ripple (click)="selectServer(server)" *ngFor="let server of appservers">{{server.name}} <mdl-switch [(ngModel)]="server.connected" (change)="toggleConnected(server)" mdl-ripple></mdl-switch></mdl-menu-item>
+      </mdl-menu>-->
+
+      <mdl-layout-title><span>Debugging </span><span *ngIf="selectedServer">{{selectedServer.name}} </span><mdl-switch *ngIf="selectedServer" [(ngModel)]="selectedServer.connected" (change)="toggleConnected(selectedServer)" mdl-ripple></mdl-switch></mdl-layout-title>
+      <mdl-layout-spacer></mdl-layout-spacer>
+      <button mdl-button #btn2="mdlButton" (click)="m2.toggle($event, btn2)" mdl-button-type="icon" mdl-ripple><mdl-icon>more_vert</mdl-icon></button>
+      <mdl-menu #m2="mdlMenu" mdl-menu-position="bottom-right">
+        <mdl-menu-item mdl-ripple (click)="logout()">Sign Out</mdl-menu-item>
+      </mdl-menu>
+    </mdl-layout-header-row>
+  </mdl-layout-header>
+  <mdl-layout-content>
+    <div gm-grid>
+      <div gm-row class="flex-80">
+        <div gm-col class="flex-30 files">
+          <div *ngIf="selectedServer">
+            <div class="section-title">{{selectedServer.name}} Files</div>
+            <div class="section-body">
+              <app-file-browser
+                [files]="serverFiles"
+                (fileShown)="fileClicked($event)"></app-file-browser>
+            </div>
+          </div>
+        </div>
+        <gm-divider></gm-divider>
+        <div gm-col class="flex-70">
+          <div class="fill-height" *ngIf="currentUri">
+            <div class="section-title">File View: {{currentUri}}</div>
+            <div class="section-body">
+              <app-codemirror *ngIf="fileText"
+                [ngModel]="fileText"
+                [breakpoints]="fileBreakpoints"
+                [config]="codeMirrorConfig"
+                [line]="currentLine"
+                [expression]="currentExpression"></app-codemirror>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div gm-divider class="debug-divider">
+        <span>Debug Area</span>
+      </div>
+      <div gm-row class="flex-20 debug-area">
+        <div gm-col class="flex-30 debugger">
+          <div class="section-title">
+            <span><mdl-icon>pause</mdl-icon></span>
+            <span (click)="continue()"><mdl-icon>play_arrow</mdl-icon></span>
+            <span (click)="stepOver()"><mdl-icon>redo</mdl-icon></span>
+            <span (click)="stepIn()"><mdl-icon>vertical_align_bottom</mdl-icon></span>
+            <span (click)="stepOut()"><mdl-icon>vertical_align_top</mdl-icon></span>
+          </div>
+          <div class="section-body">
+            <app-subsection [title]="'Stack'">
+              <ul *ngIf="stack && stack.frames" class="frames">
+                <li *ngFor="let frame of stack.frames" (click)="showFile(frame.uri, frame.line)">{{frame.uri}}:{{frame.line}}</li>
+              </ul>
+              <div *ngIf="stack && stack.expressions">{{stack.expressions[0].expressionSource}}</div>
+            </app-subsection>
+          </div>
+        </div>
+        <div gm-divider></div>
+        <div gm-col class="flex-35 breakpoints">
+          <div class="section-title">BreakPoints</div>
+          <div class="section-body">
+            <p *ngIf="!breakpointUris || breakpointUris.length === 0">No breakpoints</p>
+            <div *ngFor="let uri of breakpointUris">
+              <div>{{uri}}</div>
+              <ul>
+                <li *ngFor="let breakpoint of breakpoints[uri]">
+                  <mdl-checkbox [mdl-ripple]="true" [(ngModel)]="breakpoint.enabled" (change)="disableBreakpoint(breakpoint)">
+                    {{breakpoint.uri}}:{{breakpoint.line}}
+                  </mdl-checkbox>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div gm-divider></div>
+        <div gm-col class="flex-35 attached">
+          <div class="section-title">Processes</div>
+          <div class="section-body">
+            <p *ngIf="!attached || attached.length === 0">No Processes stopped</p>
+            <ul>
+              <li *ngFor="let attachment of attached" (click)="debugRequest(attachment.requestId)">
+                {{attachment.requestRewrittenText || attachment.requestText}}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- <section flex layout="row" layout-align="center start" *ngIf="selectedServer">
+      <section flex="25" class="md-whiteframe-1dp">
+        <section flex class="md-whiteframe-1dp">
+          <md-toolbar>
+            <h1 class="md-toolbar-tools">{{selectedServer.name}} Files</h1>
+          </md-toolbar>
+          <section flex layout-padding>
+            <app-file-browser
+              [files]="serverFiles"
+              (fileShown)="fileClicked($event)"></app-file-browser>
+          </section>
+        </section>
+      </section>
+      <md-divider md-inset></md-divider>
+      <section flex="75">
+        <section flex class="md-whiteframe-1dp">
+          <md-toolbar>
+            <h1 class="md-toolbar-tools">File View</h1>
+          </md-toolbar>
+          <section flex layout-padding>
+            <pre class="cm">{{fileText}}</pre>
+          </section>
+        </section>
+      </section>
+    </section> -->
+  </mdl-layout-content>
+</mdl-layout>
+
+<!-- <md-sidenav-layout>
+  <md-sidenav #start>
+    <md-toolbar>
+      <h1 class="md-toolbar-tools">App Servers</h1>
+    </md-toolbar>
+    <md-list class="md-dense">
+      <md-list-item (click)="showFiles(server)" class="md-2-line" *ngFor="let server of appservers">
+        <p>{{server.name}}</p>
+        <md-slide-toggle color="accent" [(ngModel)]="server.connected" (change)="toggleConnected(server)"></md-slide-toggle>
+      </md-list-item>
+    </md-list>
+  </md-sidenav>
+
+  <button md-button (click)="start.toggle()">Toggle Start Side Drawer</button>
+
+
+
+</md-sidenav-layout>
+ -->

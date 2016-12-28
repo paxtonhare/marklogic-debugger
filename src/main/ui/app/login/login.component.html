@@ -1,0 +1,45 @@
+<div class="mdl-grid">
+  <div class="mdl-cell mdl-cell--4-col"></div>
+  <div class="mdl-cell mdl-cell--4-col">
+    <mdl-card *ngIf="!appServers" mdl-shadow="2" class="login-box">
+      <mdl-card-supporting-text>
+        <form flex layout="column" (ngSubmit)="login()">
+          <div>
+            <mdl-textfield label="MarkLogic HostName" floating-label type="text" [(ngModel)]="authInfo.hostname" name="hostname" md-autofocus required="required"></mdl-textfield>
+          </div>
+          <div>
+            <mdl-textfield label="User Name" floating-label type="text" [(ngModel)]="authInfo.username" name="username" required="required"></mdl-textfield>
+          </div>
+          <div>
+            <mdl-textfield label="Password" floating-label type="password" [(ngModel)]="authInfo.password" name="password" required="required"></mdl-textfield>
+          </div>
+          <div>
+            <button type="submit" mdl-button mdl-button-type="raised" mdl-colored="primary" mdl-ripple>Login</button>
+          </div>
+        </form>
+      </mdl-card-supporting-text>
+    </mdl-card>
+
+    <mdl-card *ngIf="appServers" mdl-shadow="2" class="login-box">
+      <mdl-card-supporting-text>
+        <p>Choose the App Server you want to debug.</p>
+        <div>
+          <button class="current-server" mdl-button #appsButton="mdlButton" (click)="appsMenu.toggle($event, appsButton)" mdl-ripple>
+            <span *ngIf="currentServer">{{currentServer.name}}</span>
+            <span *ngIf="!currentServer">Choose one..</span>
+            <i class="fa fa-caret-down"></i>
+          </button>
+          <mdl-menu #appsMenu="mdlMenu" mdl-menu-position="bottom-left">
+            <mdl-menu-item mdl-ripple (click)="selectServer(server)" *ngFor="let server of appServers">{{server.name}}</mdl-menu-item>
+          </mdl-menu>
+        </div>
+
+        <button *ngIf="currentServer" id="start-debugging" type="submit"
+          mdl-button mdl-button-type="raised" mdl-colored="primary" mdl-ripple
+          (click)="startDebugging()">Start Debugging</button>
+      </mdl-card-supporting-text>
+    </mdl-card>
+  </div>
+  <div class="mdl-cell mdl-cell--4-col"></div>
+</div>
+

@@ -1,0 +1,28 @@
+/deep/ body {
+  background-color: #f3f3ff;
+}
+
+:host {
+  margin-top: 4em;
+  display: block;
+}
+
+.login-box {
+  width: 500px;
+}
+
+.current-server {
+  text-transform: none;
+}
+
+.mdl-card, .mdl-card__supporting-text {
+  overflow: initial;
+}
+
+.mdl-card__supporting-text {
+  text-align: center;
+}
+
+#start-debugging {
+  margin-top: 20px;
+}

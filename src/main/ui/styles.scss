@@ -1,0 +1,34 @@
+/* You can add global styles to this file, and also import other style files */
+@import "../../../node_modules/codemirror/lib/codemirror.css";
+@import "../../../node_modules/angular2-mdl/scss/color-definitions";
+
+// $mdi-font-path: "../../../node_modules/mdi/fonts";
+// @import "../../../node_modules/mdi/scss/materialdesignicons";
+$fa-font-path: "../../../node_modules/font-awesome/fonts";
+@import "../../../node_modules/font-awesome/scss/font-awesome";
+@import "../../../node_modules/material-design-icons/iconfont/material-icons.css";
+
+body {
+  margin: 0px;
+  padding: 0px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+$color-primary: $palette-blue-500;
+$color-primary-dark: $palette-blue-700;
+$color-accent: $palette-amber-A200;
+$color-primary-contrast: $color-dark-contrast;
+$color-accent-contrast: $color-dark-contrast;
+
+.bar {
+  box-sizing: border-box;
+  color: white;
+  width: 100%;
+  padding: 16px;
+  height: 64px;
+}
+
+@import "../../../node_modules/angular2-mdl/scss/material-design-lite";

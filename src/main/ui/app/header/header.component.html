@@ -1,0 +1,13 @@
+<mdl-layout-header-row>
+  <button mdl-button #appsButton="mdlButton" (click)="appsMenu.toggle($event, appsButton)" mdl-button-type="icon" mdl-ripple><mdl-icon>apps</mdl-icon></button>
+  <mdl-menu #appsMenu="mdlMenu" mdl-menu-position="bottom-left">
+    <mdl-menu-item mdl-ripple (click)="logout()">Sign Out</mdl-menu-item>
+  </mdl-menu>
+
+  <mdl-layout-title>Debugger</mdl-layout-title>
+  <mdl-layout-spacer></mdl-layout-spacer>
+  <button mdl-button #btn2="mdlButton" (click)="m2.toggle($event, btn2)" mdl-button-type="icon" mdl-ripple><mdl-icon>more_vert</mdl-icon></button>
+  <mdl-menu #m2="mdlMenu" mdl-menu-position="bottom-right">
+    <mdl-menu-item mdl-ripple (click)="logout()">Sign Out</mdl-menu-item>
+  </mdl-menu>
+</mdl-layout-header-row>

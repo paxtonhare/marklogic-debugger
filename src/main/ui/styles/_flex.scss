@@ -1,0 +1,10 @@
+.flex-auto {
+  flex: auto;
+}
+
+.vbox {
+  display: flex;
+  flex-direction: column !important;
+  position: relative;
+}
+

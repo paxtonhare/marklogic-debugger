@@ -1,0 +1,117 @@
+/deep/ .CodeMirror {
+  height: 100%;
+  .current-line {
+    background-color: rgba(128,128,128,0.1);
+  }
+}
+
+/deep/ .breakpoints {
+  width: .8em;
+}
+
+/deep/ .breakpoint {
+  color: #822;
+  font-size: 14pt;
+  font-weight: bold;
+  position: relative;
+}
+
+/deep/ .mdl-layout__content {
+  height: 100%;
+}
+
+[gm-grid] {
+  border-top: 1px solid #ccc;
+  height: 100%;
+  overflow: hidden;
+}
+
+[gm-col] {
+  overflow-y: auto;
+}
+
+.section-title {
+  background-color: #f3f3f3;
+  color: #333;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  // position: fixed;
+  // width: 100%;
+  // z-index: 999;
+}
+
+.files {
+  min-width: 250px;
+}
+
+
+[gm-divider].debug-divider {
+  display: block;
+  height: initial;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  background-color: #f3f3f3;
+  color: rgb(51,51,51);
+}
+
+.debug-area {
+  min-height: 100px;
+
+  .debugger {
+    .section-title {
+      padding: 5px;
+      line-height: 8px;
+
+      span {
+        cursor: default;
+        padding: 0px 2px;
+
+        /deep/ mdl-icon {
+          font-size: 16px;
+        }
+      }
+    }
+  }
+}
+
+ul.frames {
+  list-style: none;
+  padding: 0px 10px;
+}
+
+.mdl-layout__header {
+  min-height: 48px;
+}
+
+.mdl-layout__header-row {
+  height: 48px;
+  padding: 0 40px 0 10px;
+
+  .mdl-switch {
+    width: initial;
+  }
+}
+
+.flex-70 {
+  .section-body {
+    top: 41px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
+  }
+
+  .fill-height {
+    height: 100%;
+    position: relative;
+  }
+
+  app-codemirror {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+}

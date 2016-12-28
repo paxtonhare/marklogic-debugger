@@ -1,0 +1,30 @@
+:not(.filetree) > .filetree {
+  margin: 0px 0px 0px 5px;
+}
+
+.filetree {
+  margin: 5px 0px 0px 5px;
+  padding: 0px;
+  list-style: none;
+  line-height: initial;
+
+  .filetree {
+    padding: 0px 10px;
+  }
+
+  li {
+    cursor: pointer;
+    &.active {
+      background-color: rgba(121,85,72,.15);
+    }
+  }
+
+  div.entry {
+    padding: 0px 2px
+  }
+
+  p {
+    display: inline-block;
+    margin: 0px;
+  }
+}
