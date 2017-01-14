@@ -171,6 +171,25 @@ public class ApiController extends LoggingObject {
 		}
 		return "";
 	}
+
+	@RequestMapping(value = "/requests/{requestId}/eval", method = RequestMethod.POST)
+	@ResponseBody
+	public String evalExpression(@PathVariable String requestId, @RequestBody String xquery) throws InvalidRequestException {
+		ConnectionAuthenticationToken auth = (ConnectionAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
+		HashMap<String, String> hm = new HashMap<>();
+		hm.put("xquery", xquery);
+		return evalQuery(auth, "eval.xqy", hm);
+	}
+
+	@RequestMapping(value = "/requests/{requestId}/value", method = RequestMethod.POST, produces = {MediaType.TEXT_PLAIN_VALUE})
+	@ResponseBody
+	public String valueExpression(@PathVariable String requestId, @RequestBody String xquery) throws InvalidRequestException {
+		ConnectionAuthenticationToken auth = (ConnectionAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
+		HashMap<String, String> hm = new HashMap<>();
+		hm.put("requestId", requestId);
+		hm.put("xquery", xquery);
+		return evalQuery(auth, "value.xqy", hm);
+	}
 //    @RequestMapping(value = "/servers/{serverId}/file", method = RequestMethod.GET)
 //    @ResponseBody
 //    public String setBreakpoint(@PathVariable String serverId, @RequestParam String uri, @RequestParam String line, HttpSession session) throws IOException {
@@ -202,7 +221,8 @@ public class ApiController extends LoggingObject {
 			if (auth != null) {
 				try {
 					DatabaseClient client = DatabaseClientFactory.newClient((String)auth.getHostname(), 8000, (String)auth.getPrincipal(), (String)auth.getCredentials(), Authentication.DIGEST);
-					ServerEvaluationCall sec = client.newServerEval().xquery(getQuery(xquery));
+					String q = getQuery(xquery);
+					ServerEvaluationCall sec = client.newServerEval().xquery(q);
 					for (String key : params.keySet()) {
 						sec.addVariable(key, params.get(key));
 					}

@@ -20,6 +20,12 @@
   height: 100%;
 }
 
+.attached {
+  li {
+    cursor: pointer;
+  }
+}
+
 [gm-grid] {
   border-top: 1px solid #ccc;
   height: 100%;
@@ -57,6 +63,17 @@
 .debug-area {
   min-height: 100px;
 
+  .clickable {
+    color: #666;
+    &:hover {
+      color: black;
+    }
+  }
+
+  /deep/ mdl-icon {
+    font-size: 16px;
+  }
+
   .debugger {
     .section-title {
       padding: 5px;
@@ -66,9 +83,6 @@
         cursor: default;
         padding: 0px 2px;
 
-        /deep/ mdl-icon {
-          font-size: 16px;
-        }
       }
     }
   }
@@ -114,4 +128,28 @@ ul.frames {
     right: 0;
     bottom: 0;
   }
+}
+
+.prompt {
+  color: blue;
+  margin-left: 5px;
+}
+
+.console-input {
+  border: none;
+  &:focus {
+    outline: 0;
+  }
+}
+
+.console-output {
+  .prompt {
+    color: #333;
+  }
+}
+
+.console-buttons {
+  position: absolute;
+  top: 30px;
+  right: 10px;
 }

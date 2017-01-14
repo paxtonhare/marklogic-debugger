@@ -53,23 +53,9 @@ export class CodemirrorComponent implements OnInit, OnChanges {
   constructor() {}
 
   get value(): any { return this._value; };
-  @Input() set value(v) {
-    if (v !== this._value) {
-      this._value = v;
-      this.jumpToLine();
-      this.onChange(v);
-      if (this.instance) {
-        this.highlightExpression();
-      }
-    }
-  }
 
   get line(): number { return this._line + 1; };
   @Input() set line(l: number) {
-    // if (this._line && this.instance) {
-    //   this.instance.removeLineClass(this._line, 'background', 'current-line');
-    //   this.instance.removeLineClass(this._line, 'gutter', 'current-line');
-    // }
     if (l === null) {
       this._line = null;
       return;
@@ -123,7 +109,7 @@ export class CodemirrorComponent implements OnInit, OnChanges {
 
   makeMarker() {
     const marker = document.createElement('div');
-    marker.className = 'breakpoint'; // style.color = '#822';
+    marker.className = 'breakpoint';
     marker.innerHTML = '●';
     return marker;
   }
@@ -134,7 +120,6 @@ export class CodemirrorComponent implements OnInit, OnChanges {
   updateValue(value) {
     this.updateBreakpoints();
 
-    this.value = value;
     this.onChange(value);
     this.onTouched();
     this.change.emit(value);
@@ -158,17 +143,18 @@ export class CodemirrorComponent implements OnInit, OnChanges {
     this._value = value || '';
     if (this.instance) {
       this.instance.setValue(this._value);
+      this.jumpToLine();
+      this.onChange(value);
+      if (this.instance) {
+        this.highlightExpression();
+      }
     }
   }
 
 
   jumpToLine() {
     if (this.instance && this._line && this._value !== '') {
-      // const t = this.instance.charCoords({line: line, ch: 0}, "local").top;
-      // const middleHeight = this.instance.getScrollerElement().offsetHeight / 2;
       this.instance.scrollIntoView({line: this._line, ch: 0}, 20);
-      // this.instance.addLineClass(line, 'background', 'current-line')
-      // this.instance.addLineClass(line, 'gutter', 'current-line')
     }
   }
 
@@ -177,42 +163,79 @@ export class CodemirrorComponent implements OnInit, OnChanges {
       return;
     }
     const lines = this._value.split(/[\r\n]/);
-    let i = this._line;
-    let done: boolean = false;
-    let endLine: number = this._line;
 
-    while (!done) {
-      let line = lines[i];
-      //  || line.includes(this._expression)
-      done = !(this._expression.includes(line));
-      endLine = i;
-      // this.currentEndLine = i;
-      if (!done) {
-        i++;
-        if (i >= lines.length) {
+    let startLine = -1;
+    let startChar = -1;
+    let endLine = -1;
+    let endChar = -1;
+    let pos = 0;
+    let i = 0;
+    let j = 0;
+
+    let state = 'scanning';
+
+    let reset = () => {
+      startLine = -1;
+      startChar = -1;
+      endLine = -1;
+      endChar = -1;
+      pos = 0;
+      state = 'scanning';
+    }
+
+    let peak = () => {
+      if (i < lines.length && j < lines[i].length) {
+        return lines[i][j];
+      }
+      return null;
+    };
+
+    let eat = () => {
+      do {
+        j++;
+        while (i < lines.length && j > (lines[i].length - 1)) {
+          j = 0;
+          i++;
+        }
+      } while (i < lines.length && lines[i][j] === ' ');
+    };
+
+    let eatExpr = () => {
+      do {
+        pos++;
+      } while(this._expression[pos] === ' ')
+    }
+
+    while (state !== 'done' && peak() !== null) {
+      switch(state) {
+        case 'scanning':
+          if (peak() === this._expression[pos]) {
+            state = 'start';
+            startLine = i;
+            startChar = j;
+            eatExpr();
+          }
+          eat();
           break;
-        }
+        case 'start':
+          if (peak() === this._expression[pos]) {
+            eatExpr();
+            if (pos > (this._expression.length - 1)) {
+              state = 'done';
+              endLine = i;
+              endChar = j;
+            }
+          } else if (peak() === '(' || peak() === ')') {
+          } else {
+            reset();
+          }
+          eat();
+          break;
       }
     }
 
-    if (endLine > this._line) {
-      for( let j = this._line; j < endLine; j++) {
-        this.instance.addLineClass(j, 'background', 'current-line');
-        this.instance.addLineClass(j, 'gutter', 'current-line');
-      }
-    }
-    else {
-      i = this._line;
-      let line = lines[i];
-      if (line) {
-        let start: number = line.indexOf(this._expression);
-        if (start >= 0) {
-          let end = start + this._expression.length;
-          this.instance.getDoc().setSelection({line: this._line, ch: start}, {line: this._line, ch: end});
-        }
-        // do something with part of the line
-
-      }
+    if (state === 'done') {
+        this.instance.getDoc().setSelection({line: startLine, ch: startChar}, {line: endLine, ch: endChar + 1});
     }
   }
 

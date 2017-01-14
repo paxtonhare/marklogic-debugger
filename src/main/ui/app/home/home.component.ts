@@ -28,6 +28,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   requestId: any;
   appserverName: any;
   stack: any;
+  consoleInput: string;
+  consoleOutput: Array<any> = [];
 
   breakpointsSet: boolean = false;
 
@@ -237,5 +239,25 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.currentExpression = this.stack.expressions[0].expressionSource;
       }
     });
+  }
+
+  consoleKeyPressed($event: KeyboardEvent) {
+    if ($event.keyCode === 13) {
+      this.consoleOutput.push({
+        txt: this.consoleInput,
+        type: 'i'
+      });
+      this.marklogic.valueExpression(this.requestId, this.consoleInput).subscribe((output) => {
+        this.consoleOutput.push({
+          txt: output,
+          type: 'o'
+        });
+      });
+      this.consoleInput = null;
+    }
+  }
+
+  clearConsole() {
+    this.consoleOutput = [];
   }
 }

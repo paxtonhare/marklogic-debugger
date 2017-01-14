@@ -2,7 +2,6 @@ import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-subsection',
-  // encapsulation: ViewEncapsulation.None,
   templateUrl: './subsection.component.html',
   styleUrls: ['./subsection.component.scss']
 })

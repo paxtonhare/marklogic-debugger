@@ -102,6 +102,18 @@ export class MarkLogicService {
     return this.http.post(`/api/requests/${requestId}/breakpoints`, breakpoints);
   }
 
+  evalExpression(requestId: any, expression: string) {
+    return this.http.post(`/api/requests/${requestId}/eval`, expression).map((resp: Response) => {
+      return resp.text();
+    });
+  }
+
+  valueExpression(requestId: any, expression: string) {
+    return this.http.post(`/api/requests/${requestId}/value`, expression).map((resp: Response) => {
+      return resp.text();
+    });
+  }
+
   private setBreakpoints(server: string, uri, breakpoints: Array<Breakpoint>) {
     let allBreakpoints = this.getAllBreakpoints(server);
     allBreakpoints[uri] = breakpoints;

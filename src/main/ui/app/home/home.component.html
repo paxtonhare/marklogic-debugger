@@ -49,17 +49,30 @@
         <div gm-col class="flex-30 debugger">
           <div class="section-title">
             <span><mdl-icon>pause</mdl-icon></span>
-            <span (click)="continue()"><mdl-icon>play_arrow</mdl-icon></span>
-            <span (click)="stepOver()"><mdl-icon>redo</mdl-icon></span>
-            <span (click)="stepIn()"><mdl-icon>vertical_align_bottom</mdl-icon></span>
-            <span (click)="stepOut()"><mdl-icon>vertical_align_top</mdl-icon></span>
+            <span class="clickable" (click)="continue()"><mdl-icon>play_arrow</mdl-icon></span>
+            <span class="clickable" (click)="stepOver()"><mdl-icon>redo</mdl-icon></span>
+            <span class="clickable" (click)="stepIn()"><mdl-icon>vertical_align_bottom</mdl-icon></span>
+            <span class="clickable" (click)="stepOut()"><mdl-icon>vertical_align_top</mdl-icon></span>
           </div>
           <div class="section-body">
             <app-subsection [title]="'Stack'">
               <ul *ngIf="stack && stack.frames" class="frames">
                 <li *ngFor="let frame of stack.frames" (click)="showFile(frame.uri, frame.line)">{{frame.uri}}:{{frame.line}}</li>
               </ul>
-              <div *ngIf="stack && stack.expressions">{{stack.expressions[0].expressionSource}}</div>
+            </app-subsection>
+            <app-subsection [title]="'Variables'">
+              <ul *ngIf="stack && stack.frames && stack.frames[0] && stack.frames[0].variables" class="frames">
+                <li *ngFor="let variable of stack.frames[0].variables">{{variable.name}}: {{variable.value}}</li>
+              </ul>
+            </app-subsection>
+            <app-subsection [title]="'Console'">
+              <div class="console-buttons">
+                <button md-button (click)="clearConsole()">Clear</button>
+              </div>
+              <div *ngFor="let output of consoleOutput" class="console-output">
+                <span class="prompt">{{output.type === 'i' ? '>' : '<-' }} </span><span>{{output.txt}}</span>
+              </div>
+              <span class="prompt">&gt; </span><input class="console-input" type="text" [(ngModel)]="consoleInput" (keypress)="consoleKeyPressed($event)">
             </app-subsection>
           </div>
         </div>
@@ -82,7 +95,7 @@
         </div>
         <div gm-divider></div>
         <div gm-col class="flex-35 attached">
-          <div class="section-title">Processes</div>
+          <div class="section-title">Processes <span class="clickable" (click)="getAttached()"><i class="fa fa-repeat"></i></span></div>
           <div class="section-body">
             <p *ngIf="!attached || attached.length === 0">No Processes stopped</p>
             <ul>

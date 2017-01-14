@@ -7,8 +7,8 @@ declare function local:build-var-array($vars) {
     return
       json:array-push($array, map:new((
         map:entry("name", $var/*:name/fn:data()),
-        map:entry("prefix", $var/*:name/fn:data()),
-        map:entry("value", $var/*:name/fn:data())
+        map:entry("prefix", $var/*:prefix/fn:data()),
+        map:entry("value", $var/*:value/fn:data())
       )))
   return
     $array
