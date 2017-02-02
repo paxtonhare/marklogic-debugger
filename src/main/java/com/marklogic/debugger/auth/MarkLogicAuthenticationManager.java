@@ -1,7 +1,7 @@
 package com.marklogic.debugger.auth;
 
-import java.net.URI;
-
+import com.marklogic.spring.http.RestClient;
+import com.marklogic.spring.http.RestConfig;
 import com.marklogic.spring.http.SimpleRestConfig;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
@@ -15,8 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.client.HttpClientErrorException;
 
-import com.marklogic.spring.http.RestClient;
-import com.marklogic.spring.http.RestConfig;
+import java.net.URI;
 
 /**
  * Implements Spring Security's AuthenticationManager interface so that it can authenticate users by making a simple
@@ -65,7 +64,7 @@ public class MarkLogicAuthenticationManager implements AuthenticationProvider, A
          */
         restConfig.setHost(hostname);
         RestClient client = new RestClient(restConfig, new SimpleCredentialsProvider(username, password));
-        URI uri = client.buildUri(pathToAuthenticateAgainst, "");
+        URI uri = client.buildUri(pathToAuthenticateAgainst, null);
         try {
             client.getRestOperations().getForEntity(uri, String.class);
         } catch (HttpClientErrorException ex) {

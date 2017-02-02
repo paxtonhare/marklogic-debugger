@@ -20,6 +20,7 @@ import com.marklogic.spring.security.context.SpringSecurityCredentialsProvider;
 import com.marklogic.spring.security.web.util.matcher.CorsRequestMatcher;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 
 /**
  * Extends Spring Boot's default web security configuration class and hooks in MarkLogic-specific classes from
@@ -103,16 +104,13 @@ public class Config extends WebSecurityConfigurerAdapter {
       .and()
       .authorizeRequests()
       .antMatchers(getAlwaysPermittedPatterns()).permitAll().anyRequest().authenticated();
-
-//		http.csrf().requireCsrfProtectionMatcher(new CorsRequestMatcher()).and().authorizeRequests()
-//				.antMatchers(getAlwaysPermittedPatterns()).permitAll().anyRequest().authenticated().and().formLogin()
-//				.loginPage("/login").permitAll();
 	}
 
   @Bean
   public AuthSuccessHandler mySuccessHandler(){
     return new AuthSuccessHandler();
   }
+
   @Bean
   public SimpleUrlAuthenticationFailureHandler myFailureHandler(){
     return new SimpleUrlAuthenticationFailureHandler();
@@ -125,6 +123,20 @@ public class Config extends WebSecurityConfigurerAdapter {
 	 * @return
 	 */
 	protected String[] getAlwaysPermittedPatterns() {
-		return new String[] { "/bower_components/**", "/fonts/**", "/images/**", "/styles/**" };
+		return new String[] {
+			"/bower_components/**",
+			"/fonts/**",
+			"/images/**",
+			"/styles/**",
+			"/*.js",
+			"/*.ttf",
+			"/*.woff",
+			"/*.svg",
+			"/*.woff2",
+			"/*.eot",
+			"/*.css",
+			"/",
+			"/index.html"
+		};
 	}
 }

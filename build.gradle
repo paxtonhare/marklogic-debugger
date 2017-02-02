@@ -12,10 +12,17 @@ buildscript {
 }
 
 plugins {
-    id "java"
+    id 'java'
+    id 'com.moowork.node' version '0.13'
 }
 
 apply plugin: 'spring-boot'
+
+apply plugin: 'war'
+
+war {
+  baseName = 'marklogic-debugger'
+}
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -30,42 +37,66 @@ dependencies {
   compile("org.springframework.boot:spring-boot-starter:${springBootVersion}")
   compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
   compile("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
-  // compile("org.springframework.boot:spring-boot-starter-websocket:${springBootVersion}")
-  compile("org.springframework.boot:spring-boot-starter-thymeleaf:${springBootVersion}")
   compile('com.marklogic:java-client-api:3.0.5')
-  compile('com.marklogic:ml-javaclient-util:2.9.1')
   compile('commons-io:commons-io:2.4')
 
   // Optional Boot library - see https://docs.spring.io/spring-boot/docs/current/reference/html/using-boot-devtools.html
   compile("org.springframework.boot:spring-boot-devtools:${springBootVersion}")
-
   compile("com.marklogic:marklogic-spring-web:1.0")
 }
 
-// task npmInstallUI(type:Exec) {
-//   workingDir '.'
-//   commandLine 'npm', 'install'
-// }
+node {
+  // Version of node to use.
+  version = '6.8.1'
 
-// task buildUI(type:Exec) {
-//   workingDir '.'
-//   commandLine 'npm', 'run', 'build.prod'
-//   dependsOn tasks.npmInstallUI
-// }
+  // Version of npm to use.
+  npmVersion = '3.10.8'
 
-// task watchUI(type:Exec) {
-//   workingDir '.'
-//   commandLine 'npm', 'run', 'watch'
-//   dependsOn tasks.npmInstallUI
-// }
+  download = true
+
+  // Set the work directory for unpacking node
+  workDir = file("${project.buildDir}/nodejs")
+
+  // Set the work directory where node_modules should be located
+  nodeModulesDir = file("${project.projectDir}")
+}
+
+task cleanUI(type: NpmTask) {
+  args = ['run', 'clean.dist']
+}
+
+task cleanBuiltUI(type: Delete) {
+  delete 'src/main/resources/static'
+  dependsOn tasks.cleanUI
+}
+
+task npmInstallUI(type: NpmTask) {
+    args = ['install']
+    dependsOn tasks.cleanBuiltUI
+}
+
+task buildUI(type: NpmTask) {
+    args = ['run', 'build.prod']
+    dependsOn tasks.npmInstallUI
+}
+
+task copyUIAssets(type: Copy) {
+    from 'dist'
+    into 'src/main/resources/static'
+    dependsOn tasks.buildUI
+}
+
+clean.dependsOn cleanUI
+
+if (!gradle.startParameter.taskNames.contains('bootrun')) {
+  processResources.dependsOn copyUIAssets
+}
 
 // Tell Spring Boot, when run by Gradle, to watch the resources directory
 bootRun {
   addResources = true
   environment 'spring.profiles.active', 'dev'
 }
-
-// processResources.dependsOn buildUI
 
 // See http://docs.spring.io/spring-boot/docs/current/reference/html/deployment-install.html
 springBoot {

@@ -9,6 +9,6 @@ public class AppController {
 
 		@RequestMapping(value = {"/", "/login", "/home", "/404"}, method = RequestMethod.GET)
 		public String index() {
-				return "index";
+				return "index.html";
 		}
 }

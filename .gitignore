@@ -35,3 +35,4 @@ Thumbs.db
 
 /.gradle
 /build
+/src/main/resources/static

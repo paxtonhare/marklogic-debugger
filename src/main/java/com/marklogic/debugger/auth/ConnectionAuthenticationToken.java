@@ -1,4 +1,3 @@
-// org.springframework.security.authentication
 package com.marklogic.debugger.auth;
 
 import java.util.Collection;
