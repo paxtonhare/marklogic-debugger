@@ -6,6 +6,12 @@ A stand alone debugger for MarkLogic Server. Simply download the war and run it.
 
 Download the war file from the [releases page](https://github.com/marklogic/marklogic-data-hub/releases).
 
+Run it with:
+
+`java -jar marklogic-debugger.war`
+
+Open your browser to [http://localhost:8080](http://localhost:8080)
+
 ## Building From Source
 
 Want to contribute? Perhaps you just want to poke the code?
