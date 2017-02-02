@@ -8,6 +8,6 @@ Download the war file from the [releases page](https://github.com/marklogic/mark
 
 ## Building From Source
 
-Want to contrubute? Perhaps you just want to poke the code?
+Want to contribute? Perhaps you just want to poke the code?
 
 Look at our [CONTRIBUTING.md](https://github.com/paxtonhare/marklogic-debugger/blob/master/CONTRIBUTING.md#building-the-debugger-from-source) file for details on building from source.
