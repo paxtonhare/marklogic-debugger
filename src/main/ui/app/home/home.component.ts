@@ -5,6 +5,8 @@ import { MarkLogicService } from '../marklogic';
 import { Breakpoint } from '../marklogic';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../auth';
+import { ErrorComponent } from '../error';
+import { MdlDialogService, MdlDialogReference } from 'angular2-mdl';
 import * as _ from 'lodash';
 
 @Component({
@@ -17,6 +19,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   appservers: Array<any>;
   selectedServer: any;
   serverFiles: any;
+  systemFiles: any;
   attached: any;
   currentUri: string;
   currentLine: number;
@@ -30,6 +33,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   stack: any;
   consoleInput: string;
   consoleOutput: Array<any> = [];
+  commandHistory: Array<string> = [];
+  commandHistoryIndex: number = -1;
 
   breakpointsSet: boolean = false;
 
@@ -51,6 +56,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
+    private dialogService: MdlDialogService,
     private marklogic: MarkLogicService) {
   }
 
@@ -58,6 +64,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.sub = this.route.params.subscribe(params => {
       this.appserverName = params['appserverName'];
       this.requestId = params['requestId'];
+
+      if (!this.appserverName) {
+        this.router.navigate(['login']);
+      }
 
       this.marklogic.getServers().subscribe((servers: any) => {
         this.appservers = servers;
@@ -109,6 +119,14 @@ export class HomeComponent implements OnInit, OnDestroy {
     }, () => {
       this.router.navigate(['server', this.appserverName]);
     });
+  }
+
+  hasVariables() {
+    return this.stack &&
+      this.stack.frames &&
+      this.stack.frames[0] &&
+      this.stack.frames[0].variables &&
+      this.stack.frames[0].variables.length > 0;
   }
 
   debugRequest(requestId) {
@@ -215,7 +233,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   showFiles() {
     this.marklogic.getFiles(this.selectedServer.id).subscribe((files: any) => {
       this.serverFiles = files;
-      // this.$mdSidenav('left').toggle();
+    });
+
+    this.marklogic.getSystemFiles().subscribe((files: any) => {
+      this.systemFiles = files;
     });
   }
 
@@ -225,6 +246,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.marklogic.getFile(this.selectedServer.id, entry.uri).subscribe((txt: any) => {
       this.currentUri = entry.uri;
       this.fileText = txt;
+      this.getBreakpoints();
     });
   }
 
@@ -234,7 +256,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.currentUri = uri;
       this.fileText = txt;
       this.currentLine = line;
-
+      this.getBreakpoints();
       if (this.stack.expressions && this.stack.expressions.length > 0) {
         this.currentExpression = this.stack.expressions[0].expressionSource;
       }
@@ -242,19 +264,51 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   consoleKeyPressed($event: KeyboardEvent) {
+    if (!this.requestId) {
+      return;
+    }
     if ($event.keyCode === 13) {
       this.consoleOutput.push({
         txt: this.consoleInput,
         type: 'i'
       });
-      this.marklogic.valueExpression(this.requestId, this.consoleInput).subscribe((output) => {
-        this.consoleOutput.push({
-          txt: output,
-          type: 'o'
-        });
+      this.commandHistory.push(this.consoleInput);
+      this.marklogic.valueExpression(this.requestId, this.consoleInput).subscribe((output: any) => {
+        if (!output.error) {
+          this.consoleOutput.push({
+            txt: output.resp,
+            type: 'o'
+          });
+        } else {
+          this.consoleOutput.push({
+            txt: output.resp,
+            type: 'e'
+          });
+        }
       });
       this.consoleInput = null;
+      this.commandHistoryIndex = -1;
+    } else if ($event.keyCode === 38) {
+      if (this.commandHistoryIndex < (this.commandHistory.length - 1)) {
+        this.commandHistoryIndex++;
+        this.consoleInput = this.commandHistory[this.commandHistory.length - 1 - this.commandHistoryIndex];
+      }
+    } else if ($event.keyCode === 40) {
+      if (this.commandHistoryIndex > 0) {
+        this.commandHistoryIndex--;
+        this.consoleInput = this.commandHistory[this.commandHistory.length - 1 - this.commandHistoryIndex];
+      }
     }
+  }
+
+  showError(errorText: string) {
+    this.dialogService.showCustomDialog({
+      component: ErrorComponent,
+      providers: [
+        { provide: 'error', useValue: errorText }
+      ],
+      isModal: true
+    });
   }
 
   clearConsole() {

@@ -14,7 +14,7 @@
     <!-- </template> -->
   </li>
 </ul>
-<ul class="filetree" *ngIf="!isRoot && files && files.children">
+<ul class="filetree" *ngIf="!isRoot && files && files.children && !files.collapsed">
   <li *ngFor="let child of files.children" [ngClass]="{ 'active': isSelected(child)}">
     <div class="entry" (click)="entryClicked(child)">
       <i class="fa" [ngClass]="getEntryIcon(child)"></i>

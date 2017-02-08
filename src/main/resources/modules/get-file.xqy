@@ -1,18 +1,30 @@
+import module namespace admin = "http://marklogic.com/xdmp/admin"
+      at "/MarkLogic/admin.xqy";
+
 declare variable $serverId external;
 declare variable $uri external;
 
 declare variable  $ml-dir := xdmp:filesystem-filepath('.') || '/Modules';
 
-let $modules-db := xdmp:server-modules-database($serverId)
+let $server-id := xs:unsignedLong($serverId)
+let $config := admin:get-configuration()
+let $modules-db := admin:appserver-get-modules-database($config, $server-id)
+let $server-root := admin:appserver-get-root($config, $server-id)
 return
-  xdmp:invoke-function(function() {
+  if ($modules-db = 0) then
     if (fn:starts-with($uri, "/MarkLogic/")) then
       xdmp:document-get($ml-dir || $uri)
     else
-      fn:doc($uri)
-  },
-  map:new((
-    map:entry("isolation", "different-transaction"),
-    map:entry("database", $modules-db),
-    map:entry("transactionMode", "update-auto-commit")
-  )))
+      xdmp:document-get($server-root || $uri)
+  else
+    xdmp:invoke-function(function() {
+      if (fn:starts-with($uri, "/MarkLogic/")) then
+        xdmp:document-get($ml-dir || $uri)
+      else
+        fn:doc($uri)
+    },
+    <options xmlns="xdmp:eval">
+      <isolation>different-transaction</isolation>
+      <database>{$modules-db}</database>
+      <transaction-mode>update-auto-commit</transaction-mode>
+    </options>)

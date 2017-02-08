@@ -3,10 +3,27 @@
   .current-line {
     background-color: rgba(128,128,128,0.1);
   }
+
+  .current-statement {
+    background-color: rgba(255,0,0,0.2);
+  }
+}
+
+// /deep/ .mdl-switch.is-checked .mdl-switch__track {
+//   // background: rgba(0,0,0, 0.26);
+// }
+
+/deep/ .mdl-layout__header {
+  background-color: #222;
+  border-color: #080808;
 }
 
 /deep/ .breakpoints {
   width: .8em;
+
+  .section-body {
+    padding: 10px;
+  }
 }
 
 /deep/ .breakpoint {
@@ -20,9 +37,35 @@
   height: 100%;
 }
 
+.breakpoints {
+  ul {
+    margin: 0;
+    padding: 10px;
+    list-style: none;
+
+    &:hover {
+      background-color: rgba(128,128,128,0.25);
+    }
+  }
+}
+
 .attached {
-  li {
-    cursor: pointer;
+  ul {
+    margin: 0;
+    padding: 10px;
+    list-style: none;
+
+    &:hover {
+      background-color: rgba(128,128,128,0.25);
+    }
+
+    li {
+      cursor: pointer;
+    }
+  }
+
+  .section-body {
+    padding: 10px;
   }
 }
 
@@ -61,7 +104,33 @@
 }
 
 .debug-area {
-  min-height: 100px;
+  min-height: 150px;
+
+  .debugger {
+    position: relative;
+
+    .disabled {
+      position: absolute;
+      top: 0px;
+      bottom: 0px;
+      left: 0px;
+      right: 0px;
+      background: rgba(255,255,255, 0.75);
+      z-index: 10000;
+
+      span {
+        display: inline-block;
+        width: 100%;
+        font-weight: bold;
+        margin: auto;
+        text-align: center;
+        top: 50%;
+        transform: translate(0, -50%);
+        position: relative;
+        background: rgba(255,255,255, 0.75);
+      }
+    }
+  }
 
   .clickable {
     color: #666;
@@ -135,17 +204,48 @@ ul.frames {
   margin-left: 5px;
 }
 
+.no-request {
+  padding: 20px;
+  color: #666;
+}
+
 .console-input {
   border: none;
   background: transparent;
+  width: 60%;
+
   &:focus {
     outline: 0;
+  }
+
+  .prompt {
+    color: #333;
   }
 }
 
 .console-output {
+  color: #666;
+
   .prompt {
-    color: #333;
+    color: #666;
+  }
+
+  .error {
+    background-color: rgba(255, 0, 0, 0.5);
+    padding: 5px;
+    border-radius: 5px;
+    color: black;
+    width: 100%;
+    display: inline-block;
+
+    a {
+      cursor: pointer;
+    }
+
+    pre {
+      width: 100%;
+      white-space: pre-wrap;
+    }
   }
 }
 

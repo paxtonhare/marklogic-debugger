@@ -22,7 +22,12 @@ export class AuthService {
   login(authInfo: AuthModel) {
     // const params = `username=${authInfo.username}&password=${authInfo.password}&hostname=${authInfo.hostname}`;
 
-    const body = this.formData({ username: authInfo.username, password: authInfo.password, hostname: authInfo.hostname });
+    const body = this.formData({
+      username: authInfo.username,
+      password: authInfo.password,
+      hostname: authInfo.hostname,
+      port: authInfo.port
+    });
     let headers = new Headers();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
     let options = new RequestOptions({

@@ -1,8 +1,15 @@
+xquery version "1.0-ml";
+
+import module namespace admin = "http://marklogic.com/xdmp/admin"
+      at "/MarkLogic/admin.xqy";
+
 declare option xdmp:mapping "false";
 
 declare variable $serverId external;
 
-declare function local:build-files($uris as xs:string+, $parent as xs:string, $a as json:array)
+declare variable  $ml-dir := xdmp:filesystem-filepath('.') || '/Modules';
+
+declare function local:build-files($uris as xs:string*, $parent as xs:string, $a as json:array)
 {
   let $parent :=
     if (fn:ends-with($parent, "/")) then $parent
@@ -15,17 +22,17 @@ declare function local:build-files($uris as xs:string+, $parent as xs:string, $a
       return
         $file
     )
-  (:let $_ := xdmp:log(("files:", $files)):)
   for $file in $files
   let $o := json:object()
   let $_ := map:put($o, "name", $file)
   let $_ := map:put($o, "type", "file")
+  let $_ := map:put($o, "collapsed", fn:true())
   let $_ := map:put($o, "uri", $parent || $file)
   return
     json:array-push($a, $o)
 };
 
-declare function local:build-dirs($uris as xs:string+, $parent as xs:string)
+declare function local:build-dirs($uris as xs:string*, $parent as xs:string)
 {
   let $parent :=
     if (fn:ends-with($parent, "/")) then $parent
@@ -54,24 +61,66 @@ declare function local:build-dirs($uris as xs:string+, $parent as xs:string)
   return $a
 };
 
-let $modules-db := xdmp:server-modules-database($serverId)
-let $uris :=
-  xdmp:invoke-function(function() {
-    for $x in cts:search(fn:doc(), cts:true-query(), "unfiltered")
-    let $uri := xdmp:node-uri($x)
-    where fn:not(fn:ends-with($uri, "/"))
-    order by $uri ascending
+declare function local:get-system-files($dir as xs:string, $a as json:array) {
+  for $entry in xdmp:filesystem-directory($dir)/dir:entry[dir:type = "file"]
+  let $o := json:object()
+  let $_ := map:put($o, "name", fn:string($entry/dir:filename))
+  let $_ := map:put($o, "type", "file")
+  let $_ := map:put($o, "collapsed", fn:true())
+  let $_ := map:put($o, "uri", fn:replace($entry/dir:pathname, $ml-dir, ""))
+  return
+    json:array-push($a, $o)
+};
+
+declare function local:get-system-dirs($dir as xs:string, $a as json:array) {
+  for $entry in xdmp:filesystem-directory($dir)/dir:entry[dir:type = "directory"]
+  return
+    let $o := json:object()
+    let $children :=  json:array()
+    let $_ := local:get-system-dirs($entry/dir:pathname, $children)
+    let $_ := local:get-system-files($dir, $children)
+    let $_ := map:put($o, "name", fn:string($entry/dir:filename))
+    let $_ := map:put($o, "type", "dir")
+    let $_ := map:put($o, "children", $children)
     return
-      $uri
-  },
-  map:new((
-    map:entry("isolation", "different-transaction"),
-    map:entry("database", $modules-db),
-    map:entry("transactionMode", "update-auto-commit")
-  )))
-let $o := json:object()
-let $_ := map:put($o, "name", "/")
-let $_ := map:put($o, "type", "dir")
-let $_ := map:put($o, "children", local:build-dirs($uris, "/"))
+      json:array-push($a, $o)
+};
+
+let $server-id := xs:unsignedLong($serverId)
+let $config := admin:get-configuration()
+let $modules-db := admin:appserver-get-modules-database($config, $server-id)
+let $server-root := admin:appserver-get-root($config, $server-id)
+let $obj :=
+  if ($modules-db = 0) then
+    let $o := json:object()
+    let $_ := map:put($o, "name", "/")
+    let $_ := map:put($o, "type", "dir")
+    let $children := json:array()
+    let $_ := local:get-system-dirs($server-root, $children)
+    let $_ := map:put($o, "children", $children)
+    return
+      $o
+  else
+    let $uris :=
+      xdmp:invoke-function(function() {
+        for $x in cts:search(fn:doc(), cts:and-query(()), "unfiltered")
+        let $uri := xdmp:node-uri($x)
+        where fn:not(fn:ends-with($uri, "/"))
+        order by $uri ascending
+        return
+          $uri
+      },
+      map:new((
+        map:entry("isolation", "different-transaction"),
+        map:entry("database", $modules-db),
+        map:entry("transactionMode", "update-auto-commit")
+      )))
+    let $o := json:object()
+    let $_ := map:put($o, "name", "/")
+    let $_ := map:put($o, "type", "dir")
+    let $children := local:build-dirs($uris, "/")
+    let $_ := map:put($o, "children", $children)
+    return
+      $o
 return
-  $o
+  xdmp:to-json($obj)

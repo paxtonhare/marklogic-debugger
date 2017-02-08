@@ -24,6 +24,9 @@
               <app-file-browser
                 [files]="serverFiles"
                 (fileShown)="fileClicked($event)"></app-file-browser>
+              <app-file-browser
+                [files]="systemFiles"
+                (fileShown)="fileClicked($event)"></app-file-browser>
             </div>
           </div>
         </div>
@@ -47,6 +50,9 @@
       </div>
       <div gm-row class="flex-20 debug-area">
         <div gm-col class="flex-30 debugger">
+          <div class="disabled" *ngIf="!requestId">
+            <span>DEBUG A PROCESS TO ENABLE</span>
+          </div>
           <div class="section-title">
             <span><mdl-icon>pause</mdl-icon></span>
             <span class="clickable" (click)="continue()"><mdl-icon>play_arrow</mdl-icon></span>
@@ -61,18 +67,22 @@
               </ul>
             </app-subsection>
             <app-subsection [title]="'Variables'">
-              <ul *ngIf="stack && stack.frames && stack.frames[0] && stack.frames[0].variables" class="frames">
+              <ul *ngIf="hasVariables()" class="frames">
                 <li *ngFor="let variable of stack.frames[0].variables">{{variable.name}}: {{variable.value}}</li>
               </ul>
+              <p *ngIf="!hasVariables()">&nbsp;</p>
             </app-subsection>
             <app-subsection [title]="'Console'">
               <div class="console-buttons">
                 <button md-button (click)="clearConsole()">Clear</button>
               </div>
               <div *ngFor="let output of consoleOutput" class="console-output">
-                <span class="prompt">{{output.type === 'i' ? '>' : '<-' }} </span><span>{{output.txt}}</span>
+                <span *ngIf="output.type === 'e'" class="error">Server Error <a (click)="showError(output.txt)">(show)</a></span>
+                <span *ngIf="output.type !== 'e'">
+                  <span class="prompt">{{output.type === 'i' ? '>' : '<-' }} </span><span>{{output.txt}}</span>
+                </span>
               </div>
-              <span class="prompt">&gt; </span><input class="console-input" type="text" [(ngModel)]="consoleInput" (keypress)="consoleKeyPressed($event)">
+              <span class="prompt">&gt; </span><input class="console-input" type="text" [(ngModel)]="consoleInput" (keyup)="consoleKeyPressed($event)">
             </app-subsection>
           </div>
         </div>
@@ -82,11 +92,10 @@
           <div class="section-body">
             <p *ngIf="!breakpointUris || breakpointUris.length === 0">No breakpoints</p>
             <div *ngFor="let uri of breakpointUris">
-              <div>{{uri}}</div>
               <ul>
                 <li *ngFor="let breakpoint of breakpoints[uri]">
                   <mdl-checkbox [mdl-ripple]="true" [(ngModel)]="breakpoint.enabled" (change)="disableBreakpoint(breakpoint)">
-                    {{breakpoint.uri}}:{{breakpoint.line}}
+                    {{breakpoint.uri}}:{{breakpoint.line + 1}}
                   </mdl-checkbox>
                 </li>
               </ul>
@@ -100,6 +109,7 @@
             <p *ngIf="!attached || attached.length === 0">No Processes stopped</p>
             <ul>
               <li *ngFor="let attachment of attached" (click)="debugRequest(attachment.requestId)">
+                <i class="fa fa-long-arrow-right" *ngIf="requestId === attachment.requestId"></i>
                 {{attachment.requestRewrittenText || attachment.requestText}}
               </li>
             </ul>

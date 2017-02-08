@@ -25,6 +25,10 @@ export class MarkLogicService {
     return this.get('/api/servers/' + serverId + '/files');
   }
 
+  getSystemFiles() {
+    return this.get('/api/marklogic/files');
+  }
+
   getFile(serverId, uri) {
     let options: RequestOptionsArgs = {
       headers: new Headers({'Accept': 'text/plain'})
@@ -110,7 +114,7 @@ export class MarkLogicService {
 
   valueExpression(requestId: any, expression: string) {
     return this.http.post(`/api/requests/${requestId}/value`, expression).map((resp: Response) => {
-      return resp.text();
+      return resp.json();
     });
   }
 

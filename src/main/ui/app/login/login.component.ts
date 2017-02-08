@@ -9,7 +9,7 @@ import { MarkLogicService } from '../marklogic';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
-  authInfo: AuthModel = new AuthModel('localhost', 'admin', 'admin');
+  authInfo: AuthModel = new AuthModel('localhost', 8000, 'admin', 'admin');
   appServers: Array<any>;
   currentServer: any;
 

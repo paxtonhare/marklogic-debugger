@@ -15,6 +15,7 @@ import { Breakpoint } from '../marklogic';
 import * as CodeMirror from 'codemirror';
 require('codemirror/mode/xquery/xquery');
 require('codemirror/mode/javascript/javascript');
+require('codemirror/addon/selection/mark-selection');
 
 /**
  * CodeMirror component
@@ -44,6 +45,8 @@ export class CodemirrorComponent implements OnInit, OnChanges {
   private _value = '';
   private _line: number;
   private _expression: string;
+
+  private currentStatement: CodeMirror.TextMarker;
 
   @Output() instance: CodeMirror.EditorFromTextArea = null;
 
@@ -159,6 +162,11 @@ export class CodemirrorComponent implements OnInit, OnChanges {
   }
 
   highlightExpression() {
+    if (this.currentStatement) {
+      this.currentStatement.clear();
+      this.currentStatement = null;
+    }
+
     if (this._value === '' || !this._expression || !this._line) {
       return;
     }
@@ -217,8 +225,23 @@ export class CodemirrorComponent implements OnInit, OnChanges {
           }
           eat();
           break;
+        case 'comment':
+          if (peak() === ':') {
+            eat();
+            if (peak() === ')') {
+              state = 'start';
+              eat();
+            }
+            continue;
+          }
+          eat();
+          break;
         case 'start':
-          if (peak() === this._expression[pos]) {
+          if (peak() === this._expression[pos] ||
+            (
+              (peak() === '"' || peak() === '\'') &&
+              (this._expression[pos] === '"' || this._expression[pos] === '\'')
+            )) {
             eatExpr();
             if (pos > (this._expression.length - 1)) {
               state = 'done';
@@ -226,6 +249,38 @@ export class CodemirrorComponent implements OnInit, OnChanges {
               endChar = j;
             }
           } else if (peak() === '(' || peak() === ')') {
+            eat();
+            if (peak() === ':') {
+              state = 'comment';
+              eat();
+            }
+            continue;
+          } else if (peak() === '/' && this._expression[pos] === 'd') {
+            if (this._expression.substring(pos).startsWith('descendant::')) {
+              pos += 'descendant::'.length;
+            } else {
+              reset();
+            }
+          } else if (this._expression[pos] === 'f') {
+            if (this._expression.substring(pos).startsWith('fn:unordered(')) {
+              pos += 'fn:unordered('.length;
+              continue;
+            } else if (this._expression.substring(pos).startsWith('fn:')) {
+              pos += 'fn:'.length;
+              continue;
+            } else {
+              reset();
+            }
+          } else if (this._expression[pos] === 'n') {
+            if (this._expression.substring(pos).startsWith('n:')) {
+              pos += 'n:f'.length;
+              continue;
+            } else {
+              reset();
+            }
+          } else if (this._expression[pos] === ')') {
+            eatExpr();
+            continue;
           } else {
             reset();
           }
@@ -235,7 +290,8 @@ export class CodemirrorComponent implements OnInit, OnChanges {
     }
 
     if (state === 'done') {
-        this.instance.getDoc().setSelection({line: startLine, ch: startChar}, {line: endLine, ch: endChar + 1});
+        this.currentStatement = this.instance.getDoc().markText({line: startLine, ch: startChar}, {line: endLine, ch: endChar + 1}, {className: "current-statement"});
+        // this.instance.getDoc().setSelection({line: startLine, ch: startChar}, {line: endLine, ch: endChar + 1});
     }
   }
 

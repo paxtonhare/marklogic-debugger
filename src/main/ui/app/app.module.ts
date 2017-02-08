@@ -14,6 +14,7 @@ import { FileBrowserComponent } from './file-browser';
 import { HeaderComponent } from './header';
 import { HomeComponent } from './home';
 import { LoginComponent } from './login';
+import { ErrorComponent } from './error';
 import { SubsectionComponent } from './subsection';
 import { MarkLogicService } from './marklogic';
 import { ROUTES } from './app.routes';
@@ -25,6 +26,7 @@ import { ROUTES } from './app.routes';
     HeaderComponent,
     HomeComponent,
     LoginComponent,
+    ErrorComponent,
     SubsectionComponent,
     CodemirrorComponent
   ],
@@ -36,6 +38,9 @@ import { ROUTES } from './app.routes';
     // MaterialModule.forRoot()
     MdlModule,
     GridManiaModule
+  ],
+  entryComponents: [
+    ErrorComponent
   ],
   providers: [
     AUTH_PROVIDERS,

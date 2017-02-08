@@ -4,11 +4,15 @@ import com.marklogic.client.DatabaseClient;
 import com.marklogic.client.DatabaseClientFactory;
 import com.marklogic.client.DatabaseClientFactory.Authentication;
 import com.marklogic.client.FailedRequestException;
+import com.marklogic.client.ResourceNotFoundException;
 import com.marklogic.client.eval.EvalResult;
 import com.marklogic.client.eval.EvalResultIterator;
 import com.marklogic.client.eval.ServerEvaluationCall;
 import com.marklogic.debugger.auth.ConnectionAuthenticationToken;
 import com.marklogic.debugger.errors.InvalidRequestException;
+import com.marklogic.xcc.*;
+import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.types.ValueType;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -91,6 +95,15 @@ public class ApiController {
 		}
 
 
+	@RequestMapping(value = "/marklogic/files", method = RequestMethod.GET)
+	@ResponseBody
+	public String getMarkLogicSystemFiles() throws InvalidRequestException {
+		ConnectionAuthenticationToken auth = (ConnectionAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
+		HashMap<String, String> hm = new HashMap<>();
+		return evalQuery(auth, "get-marklogic-system-files.xqy", hm);
+	}
+
+
 		@RequestMapping(value = "/servers/{serverId}/file", method = RequestMethod.GET)
 		@ResponseBody
 		public String getServerFile(@PathVariable String serverId, @RequestParam String uri) throws InvalidRequestException {
@@ -169,6 +182,15 @@ public class ApiController {
 		return "";
 	}
 
+	@RequestMapping(value = "/requests/{requestId}/breakpoints", method = RequestMethod.GET)
+	@ResponseBody
+	public String getBreakpoints(@PathVariable String requestId) throws InvalidRequestException {
+		ConnectionAuthenticationToken auth = (ConnectionAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
+		HashMap<String, String> hm = new HashMap<>();
+		hm.put("requestId", requestId);
+		return evalQuery(auth, "set-breakpoints.xqy", hm);
+	}
+
 	@RequestMapping(value = "/requests/{requestId}/eval", method = RequestMethod.POST)
 	@ResponseBody
 	public String evalExpression(@PathVariable String requestId, @RequestBody String xquery) throws InvalidRequestException {
@@ -207,7 +229,7 @@ public class ApiController {
 			String result = "";
 			if (auth != null) {
 				try {
-					DatabaseClient client = DatabaseClientFactory.newClient((String)auth.getHostname(), 8000, (String)auth.getPrincipal(), (String)auth.getCredentials(), Authentication.DIGEST);
+					DatabaseClient client = DatabaseClientFactory.newClient((String)auth.getHostname(), (Integer)auth.getPort(), (String)auth.getPrincipal(), (String)auth.getCredentials(), Authentication.DIGEST);
 					String q = getQuery(xquery);
 					ServerEvaluationCall sec = client.newServerEval().xquery(q);
 					for (String key : params.keySet()) {
@@ -217,6 +239,20 @@ public class ApiController {
 					if (it != null && it.hasNext()) {
 						EvalResult res = it.next();
 						result += res.getString();
+					}
+				}
+				catch(ResourceNotFoundException e) {
+					try {
+						ContentSource contentSource = ContentSourceFactory.newContentSource((String)auth.getHostname(), (Integer)auth.getPort(), (String)auth.getPrincipal(), (String)auth.getCredentials());
+						Session session = contentSource.newSession();
+						AdhocQuery adhocQuery = session.newAdhocQuery(getQuery(xquery));
+						for (String key : params.keySet()) {
+							adhocQuery.setNewVariable(key, ValueType.XS_STRING, params.get(key));
+						}
+						ResultSequence res = session.submitRequest(adhocQuery);
+						result += res.asString();
+					} catch (RequestException e1) {
+						e1.printStackTrace();
 					}
 				}
 				catch(FailedRequestException e) {

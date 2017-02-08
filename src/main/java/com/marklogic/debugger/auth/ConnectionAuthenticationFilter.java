@@ -37,10 +37,12 @@ public class ConnectionAuthenticationFilter extends
   public static final String SPRING_SECURITY_FORM_USERNAME_KEY = "username";
   public static final String SPRING_SECURITY_FORM_PASSWORD_KEY = "password";
   public static final String SPRING_SECURITY_FORM_HOST_KEY = "hostname";
+  public static final String SPRING_SECURITY_FORM_PORT_KEY = "port";
 
   private String usernameParameter = SPRING_SECURITY_FORM_USERNAME_KEY;
   private String passwordParameter = SPRING_SECURITY_FORM_PASSWORD_KEY;
   private String hostnameParameter = SPRING_SECURITY_FORM_HOST_KEY;
+  private String hostportParameter = SPRING_SECURITY_FORM_PORT_KEY;
   private boolean postOnly = true;
 
   // ~ Constructors
@@ -63,8 +65,10 @@ public class ConnectionAuthenticationFilter extends
     String username = obtainUsername(request);
     String password = obtainPassword(request);
     String hostname = obtainHostname(request);
+    Integer port = obtainPort(request);
     LoginInfo loginInfo = new LoginInfo();
     loginInfo.hostname = hostname;
+    loginInfo.port = port;
     loginInfo.username = username;
     loginInfo.password = password;
     request.getSession().setAttribute("loginInfo", loginInfo);
@@ -81,10 +85,14 @@ public class ConnectionAuthenticationFilter extends
       hostname = "";
     }
 
+    if (port == null) {
+    	port = 8000;
+    }
+
     username = username.trim();
 
     ConnectionAuthenticationToken authRequest = new ConnectionAuthenticationToken(
-        username, password, hostname);
+        username, password, hostname, port);
 
     // Allow subclasses to set the "details" property
     setDetails(request, authRequest);
@@ -126,6 +134,10 @@ public class ConnectionAuthenticationFilter extends
 
   protected String obtainHostname(HttpServletRequest request) {
     return request.getParameter(hostnameParameter);
+  }
+
+  protected Integer obtainPort(HttpServletRequest request) {
+  	return Integer.parseInt(request.getParameter(hostportParameter));
   }
 
   /**

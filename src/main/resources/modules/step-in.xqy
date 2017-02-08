@@ -1,3 +1,3 @@
 declare variable $requestId external;
 
-dbg:step($requestId)
+dbg:step(xs:unsignedLong($requestId))
