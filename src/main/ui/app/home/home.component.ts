@@ -18,6 +18,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   appservers: Array<any>;
   selectedServer: any;
+  hostname: string;
+  port: number;
   serverFiles: any;
   systemFiles: any;
   attached: any;
@@ -58,6 +60,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private dialogService: MdlDialogService,
     private marklogic: MarkLogicService) {
+    this.hostname = authService.hostname;
+    this.port = authService.port;
   }
 
   ngOnInit() {

@@ -4,11 +4,21 @@
     <mdl-card *ngIf="!appServers" mdl-shadow="2" class="login-box">
       <mdl-card-supporting-text>
         <form flex layout="column" (ngSubmit)="login()">
-          <div>
-            <mdl-textfield label="MarkLogic HostName" floating-label type="text" [(ngModel)]="authInfo.hostname" name="hostname" md-autofocus required="required"></mdl-textfield>
+          <div class="error" *ngIf="invalidLogin">
+          Invalid Username or Password
+          </div>
+          <div class="error" *ngIf="!serverOk">
+          Unable to reach http://{{authInfo.hostname}}:{{authInfo.port}}
           </div>
           <div>
-            <mdl-textfield label="MarkLogic Port" floating-label type="number" [(ngModel)]="authInfo.port" name="port" md-autofocus required="required"></mdl-textfield>
+            <i *ngIf="serverOk" class="fa fa-check"></i>
+            <i *ngIf="!serverOk" class="fa fa-times"></i>
+            <mdl-textfield label="MarkLogic HostName" floating-label type="text" [ngModel]="authInfo.hostname" (ngModelChange)="updateHostname($event)" name="hostname" md-autofocus required="required"></mdl-textfield>
+          </div>
+          <div>
+            <i *ngIf="serverOk" class="fa fa-check"></i>
+            <i *ngIf="!serverOk" class="fa fa-times"></i>
+            <mdl-textfield label="MarkLogic Port" floating-label type="number" [ngModel]="authInfo.port" (ngModelChange)="updatePort($event)" name="port" md-autofocus required="required"></mdl-textfield>
           </div>
           <div>
             <mdl-textfield label="User Name" floating-label type="text" [(ngModel)]="authInfo.username" name="username" required="required"></mdl-textfield>
@@ -17,7 +27,7 @@
             <mdl-textfield label="Password" floating-label type="password" [(ngModel)]="authInfo.password" name="password" required="required"></mdl-textfield>
           </div>
           <div>
-            <button type="submit" mdl-button mdl-button-type="raised" mdl-colored="primary" mdl-ripple>Login</button>
+            <button [disabled]="!serverOk" type="submit" mdl-button mdl-button-type="raised" mdl-colored="primary" mdl-ripple>Login</button>
           </div>
         </form>
       </mdl-card-supporting-text>

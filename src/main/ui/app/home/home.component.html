@@ -1,12 +1,14 @@
 <mdl-layout mdl-layout-fixed-header mdl-layout-header-seamed>
   <mdl-layout-header>
     <mdl-layout-header-row>
-      <!--<button mdl-button #appsButton="mdlButton" (click)="appsMenu.toggle($event, appsButton)" mdl-button-type="icon" mdl-ripple><mdl-icon>apps</mdl-icon></button>
-      <mdl-menu #appsMenu="mdlMenu" mdl-menu-position="bottom-left">
-        <mdl-menu-item mdl-ripple (click)="selectServer(server)" *ngFor="let server of appservers">{{server.name}} <mdl-switch [(ngModel)]="server.connected" (change)="toggleConnected(server)" mdl-ripple></mdl-switch></mdl-menu-item>
-      </mdl-menu>-->
-
-      <mdl-layout-title><span>Debugging </span><span *ngIf="selectedServer">{{selectedServer.name}} </span><mdl-switch *ngIf="selectedServer" [(ngModel)]="selectedServer.connected" (change)="toggleConnected(selectedServer)" mdl-ripple></mdl-switch></mdl-layout-title>
+      <mdl-layout-title>
+        <span class="server">http://{{hostname}}:{{port}}</span>
+        <span class="selected-server" *ngIf="selectedServer">{{selectedServer.name}} </span>
+        <span class="debug-toggle">
+          <mdl-switch *ngIf="selectedServer" [(ngModel)]="selectedServer.connected" (change)="toggleConnected(selectedServer)" mdl-ripple></mdl-switch>
+          <span class="debug-status" *ngIf="selectedServer"> Debugging is <strong>{{selectedServer.connected ? 'ON' : 'OFF'}}</strong></span>
+        </span>
+        </mdl-layout-title>
       <mdl-layout-spacer></mdl-layout-spacer>
       <button mdl-button #btn2="mdlButton" (click)="m2.toggle($event, btn2)" mdl-button-type="icon" mdl-ripple><mdl-icon>more_vert</mdl-icon></button>
       <mdl-menu #m2="mdlMenu" mdl-menu-position="bottom-right">
@@ -51,7 +53,7 @@
       <div gm-row class="flex-20 debug-area">
         <div gm-col class="flex-30 debugger">
           <div class="disabled" *ngIf="!requestId">
-            <span>DEBUG A PROCESS TO ENABLE</span>
+            <span>DEBUG A REQUEST TO ENABLE</span>
           </div>
           <div class="section-title">
             <span><mdl-icon>pause</mdl-icon></span>
@@ -104,13 +106,13 @@
         </div>
         <div gm-divider></div>
         <div gm-col class="flex-35 attached">
-          <div class="section-title">Processes <span class="clickable" (click)="getAttached()"><i class="fa fa-repeat"></i></span></div>
+          <div class="section-title">Requests <span class="clickable" (click)="getAttached()"><i class="fa fa-repeat"></i></span></div>
           <div class="section-body">
-            <p *ngIf="!attached || attached.length === 0">No Processes stopped</p>
+            <p *ngIf="!attached || attached.length === 0">No Requests stopped</p>
             <ul>
               <li *ngFor="let attachment of attached" (click)="debugRequest(attachment.requestId)">
                 <i class="fa fa-long-arrow-right" *ngIf="requestId === attachment.requestId"></i>
-                {{attachment.requestRewrittenText || attachment.requestText}}
+                {{attachment.requestRewrittenText || attachment.requestText}} <span class="request-id">({{attachment.requestId}})</span>
               </li>
             </ul>
           </div>

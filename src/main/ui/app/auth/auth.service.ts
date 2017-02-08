@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter } from '@angular/core';
-import { Headers, Http, RequestOptions } from '@angular/http';
+import { Headers, Http, RequestOptions, Response } from '@angular/http';
 
 import { AuthModel } from './auth.model';
 
@@ -14,14 +14,28 @@ export class AuthService {
     return localStorage.getItem('_isAuthenticated_') === 'true';
   }
 
-  setAuthenticated(authed: boolean) {
+  get hostname() : string {
+    return localStorage.getItem('_authed_host_');
+  }
+
+  get port() : number {
+    return parseInt(localStorage.getItem('_authed_port_'), 10);
+  }
+
+  setAuthenticated(authed: boolean, hostname: string, port: number) {
     localStorage.setItem('_isAuthenticated_', authed.toString());
+    localStorage.setItem('_authed_host_', hostname);
+    localStorage.setItem('_authed_port_', port.toString());
     this.authenticated.emit(authed);
   }
 
-  login(authInfo: AuthModel) {
-    // const params = `username=${authInfo.username}&password=${authInfo.password}&hostname=${authInfo.hostname}`;
+  checkServer(authInfo: AuthModel) {
+    return this.http.get(`/api/server/status?host=${authInfo.hostname}&port=${authInfo.port}`).map((resp: Response) => {
+      return resp.json();
+    });
+  }
 
+  login(authInfo: AuthModel) {
     const body = this.formData({
       username: authInfo.username,
       password: authInfo.password,
@@ -36,8 +50,9 @@ export class AuthService {
     });
     let resp = this.http.post('/api/user/login', body, options).share();
     resp.subscribe(() => {
-      this.setAuthenticated(true);
-    });
+      this.setAuthenticated(true, authInfo.hostname, authInfo.port);
+    },
+    (error) => {});
     return resp;
   }
 

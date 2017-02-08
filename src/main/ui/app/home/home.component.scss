@@ -61,6 +61,10 @@
 
     li {
       cursor: pointer;
+
+      .request-id {
+        font-size: 60%;
+      }
     }
   }
 
@@ -172,6 +176,26 @@ ul.frames {
 
   .mdl-switch {
     width: initial;
+  }
+
+  .server {
+    font-size: 12px;
+    margin-right: 20px;
+  }
+
+  .selected-server {
+    margin-right: 20px;
+  }
+
+  .debug-toggle {
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 2px;
+    display: inline-block;
+
+    .debug-status {
+      margin-left: 20px;
+      font-size: 14px;
+    }
   }
 }
 

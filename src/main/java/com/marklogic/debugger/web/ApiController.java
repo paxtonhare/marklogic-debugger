@@ -14,7 +14,13 @@ import com.marklogic.xcc.*;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.types.ValueType;
 import org.apache.commons.io.IOUtils;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
@@ -23,6 +29,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -59,6 +67,25 @@ public class ApiController {
       SecurityContextHolder.clearContext();
 			return "{\"authenticated\":false}";
 		}
+
+	@RequestMapping(value = "/server/status", method = RequestMethod.GET)
+	@ResponseBody
+	public String serverStatus(@RequestParam String host, @RequestParam int port) {
+		boolean result = false;
+		try {
+			SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+			requestFactory.setConnectTimeout(500);
+			ClientHttpRequest request = requestFactory.createRequest(new URI("http://" + host + ":" + port), HttpMethod.HEAD);
+			ClientHttpResponse response = request.execute();
+			result = true;
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+
+		return "{\"result\":" + result + "}";
+	}
 
 		@RequestMapping(value = "/servers", method = RequestMethod.GET)
 		@ResponseBody
