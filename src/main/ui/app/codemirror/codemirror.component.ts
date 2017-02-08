@@ -110,10 +110,10 @@ export class CodemirrorComponent implements OnInit, OnChanges {
 
   }
 
-  makeMarker() {
+  makeMarker(enabled: boolean) {
     const marker = document.createElement('div');
-    marker.className = 'breakpoint';
-    marker.innerHTML = '●';
+    marker.className = 'breakpoint' + (enabled ? '-enabled' : '-disabled');
+    marker.innerHTML = '◉';
     return marker;
   }
 
@@ -133,7 +133,7 @@ export class CodemirrorComponent implements OnInit, OnChanges {
       this.instance.clearGutter('breakpoints');
       if (this.breakpoints) {
         for (let breakpoint of this.breakpoints) {
-          this.instance.setGutterMarker(breakpoint.line, 'breakpoints', this.makeMarker());
+          this.instance.setGutterMarker(breakpoint.line, 'breakpoints', this.makeMarker(breakpoint.enabled));
         }
       }
     }

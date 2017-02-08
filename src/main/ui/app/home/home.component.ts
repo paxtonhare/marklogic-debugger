@@ -48,7 +48,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     cursorBlinkRate: 0,
     gutters: ['CodeMirror-linenumbers', 'breakpoints'],
     events: {
-      gutterClick: this.gutterClick.bind(this)
+      gutterClick: this.gutterClick.bind(this),
+      gutterContextMenu: this.gutterContextMenu.bind(this)
     }
   };
 
@@ -183,16 +184,22 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
 
     return Observable.of({});
-    // const evt: EventEmitter<Response> = new EventEmitter<Response>();// = new Observable<string>();
-    // evt.emit(null);
-    // return evt;
   }
 
-  gutterClick(cm, line, gutter, clickEvent) {
-    console.log('clicked: ' + line);
+  gutterContextMenu(cm: any, line: number, gutter: string, clickEvent: MouseEvent) {
+    clickEvent.preventDefault();
+    clickEvent.stopPropagation();
+  }
+
+  gutterClick(cm: any, line: number, gutter: string, clickEvent: MouseEvent) {
+    console.log(clickEvent);
     const info = cm.lineInfo(line);
-    if (info.gutterMarkers) {
+    if (info.gutterMarkers && clickEvent.which === 3) {
+      clickEvent.preventDefault();
+      clickEvent.stopPropagation();
       this.marklogic.disableBreakpoint(this.selectedServer.name, this.currentUri, line);
+    } else if (info.gutterMarkers) {
+      this.marklogic.toggleBreakpoint(this.selectedServer.name, this.currentUri, line);
     } else {
       this.marklogic.enableBreakpoint(this.selectedServer.name, this.currentUri, line);
     }
@@ -209,9 +216,18 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
-  disableBreakpoint(breakpoint: Breakpoint) {
-    this.marklogic.disableBreakpoint(this.selectedServer.name, breakpoint.uri, breakpoint.line);
+  toggleBreakpoint(breakpoint: Breakpoint) {
+    this.marklogic.toggleBreakpoint(this.selectedServer.name, breakpoint.uri, breakpoint.line);
     this.getBreakpoints();
+  }
+
+  disableBreakpoint(breakpoint: Breakpoint) {
+    let result = this.dialogService.confirm('Delete this breakpoint?', 'No', 'Yes');
+    result.subscribe((choosedOption) => {
+      this.marklogic.disableBreakpoint(this.selectedServer.name, breakpoint.uri, breakpoint.line);
+      this.getBreakpoints();
+    },
+    () => {});
   }
 
   toggleConnected(server) {
@@ -230,10 +246,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  // selectServer(server) {
-  //   this.router.navigate(['server', server.name]);
-  // }
-
   showFiles() {
     this.marklogic.getFiles(this.selectedServer.id).subscribe((files: any) => {
       this.serverFiles = files;
@@ -244,11 +256,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  fileClicked(entry) {
+  fileClicked(uri) {
     this.fileBreakpoints = null;
     this.currentLine = null;
-    this.marklogic.getFile(this.selectedServer.id, entry.uri).subscribe((txt: any) => {
-      this.currentUri = entry.uri;
+    this.marklogic.getFile(this.selectedServer.id, uri).subscribe((txt: any) => {
+      this.currentUri = uri;
       this.fileText = txt;
       this.getBreakpoints();
     });

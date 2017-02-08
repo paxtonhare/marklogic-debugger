@@ -19,15 +19,22 @@
 }
 
 /deep/ .breakpoints {
-  width: .8em;
+  width: 1.5em;
 
   .section-body {
     padding: 10px;
   }
 }
 
-/deep/ .breakpoint {
+/deep/ .breakpoint-enabled {
   color: #822;
+  font-size: 14pt;
+  font-weight: bold;
+  position: relative;
+}
+
+/deep/ .breakpoint-disabled {
+  color: #ccc;
   font-size: 14pt;
   font-weight: bold;
   position: relative;
@@ -42,9 +49,27 @@
     margin: 0;
     padding: 10px;
     list-style: none;
+    cursor: default;
+
+    .breakpoint-symbol {
+      cursor: pointer;
+      color: #ddd;
+
+      &.enabled {
+        color: #822;
+      }
+    }
+
+    .fa-times {
+      float: right;
+
+      &:hover {
+        color: red;
+      }
+    }
 
     &:hover {
-      background-color: rgba(128,128,128,0.25);
+      background-color: #fafafa;
     }
   }
 }
@@ -119,7 +144,7 @@
       bottom: 0px;
       left: 0px;
       right: 0px;
-      background: rgba(255,255,255, 0.75);
+      background: rgba(255,255,255, 0.90);
       z-index: 10000;
 
       span {

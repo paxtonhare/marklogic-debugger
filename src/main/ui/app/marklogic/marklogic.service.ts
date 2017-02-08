@@ -92,6 +92,17 @@ export class MarkLogicService {
     this.setBreakpoints(server, uri, breakpoints);
   }
 
+  toggleBreakpoint(server: string, uri: string, line: number) {
+    let breakpoints = this.getBreakpoints(server, uri);
+    let breakpoint = _.find(breakpoints, (breakpoint: Breakpoint) => {
+      return breakpoint.uri === uri && breakpoint.line === line;
+    });
+    if (breakpoint) {
+      breakpoint.enabled = !breakpoint.enabled;
+      this.setBreakpoints(server, uri, breakpoints);
+    }
+  }
+
   disableBreakpoint(server: string, uri: string, line: number) {
     let breakpoints: Array<Breakpoint> = this.getBreakpoints(server, uri);
     _.remove(breakpoints, (bp) => { return bp.line === line; });
@@ -103,7 +114,8 @@ export class MarkLogicService {
   }
 
   sendBreakpoints(requestId: any, breakpoints: Array<Breakpoint>) {
-    return this.http.post(`/api/requests/${requestId}/breakpoints`, breakpoints);
+    let onOnly = _.filter(breakpoints, { enabled: true });
+    return this.http.post(`/api/requests/${requestId}/breakpoints`, onOnly);
   }
 
   evalExpression(requestId: any, expression: string) {

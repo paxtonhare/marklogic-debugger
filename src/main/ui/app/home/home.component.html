@@ -25,10 +25,10 @@
             <div class="section-body">
               <app-file-browser
                 [files]="serverFiles"
-                (fileShown)="fileClicked($event)"></app-file-browser>
+                (fileShown)="fileClicked($event.uri)"></app-file-browser>
               <app-file-browser
                 [files]="systemFiles"
-                (fileShown)="fileClicked($event)"></app-file-browser>
+                (fileShown)="fileClicked($event.uri)"></app-file-browser>
             </div>
           </div>
         </div>
@@ -96,9 +96,9 @@
             <div *ngFor="let uri of breakpointUris">
               <ul>
                 <li *ngFor="let breakpoint of breakpoints[uri]">
-                  <mdl-checkbox [mdl-ripple]="true" [(ngModel)]="breakpoint.enabled" (change)="disableBreakpoint(breakpoint)">
-                    {{breakpoint.uri}}:{{breakpoint.line + 1}}
-                  </mdl-checkbox>
+                  <span class="breakpoint-symbol" (click)="toggleBreakpoint(breakpoint)" [ngClass]="{ 'enabled' : breakpoint.enabled }">&#x25C9;</span>
+                  <span (click)="fileClicked(breakpoint.uri)">{{breakpoint.uri}}:{{breakpoint.line + 1}}</span>
+                  <i class="fa fa-times" (click)="disableBreakpoint(breakpoint)"></i>
                 </li>
               </ul>
             </div>
@@ -119,50 +119,5 @@
         </div>
       </div>
     </div>
-    <!-- <section flex layout="row" layout-align="center start" *ngIf="selectedServer">
-      <section flex="25" class="md-whiteframe-1dp">
-        <section flex class="md-whiteframe-1dp">
-          <md-toolbar>
-            <h1 class="md-toolbar-tools">{{selectedServer.name}} Files</h1>
-          </md-toolbar>
-          <section flex layout-padding>
-            <app-file-browser
-              [files]="serverFiles"
-              (fileShown)="fileClicked($event)"></app-file-browser>
-          </section>
-        </section>
-      </section>
-      <md-divider md-inset></md-divider>
-      <section flex="75">
-        <section flex class="md-whiteframe-1dp">
-          <md-toolbar>
-            <h1 class="md-toolbar-tools">File View</h1>
-          </md-toolbar>
-          <section flex layout-padding>
-            <pre class="cm">{{fileText}}</pre>
-          </section>
-        </section>
-      </section>
-    </section> -->
   </mdl-layout-content>
 </mdl-layout>
-
-<!-- <md-sidenav-layout>
-  <md-sidenav #start>
-    <md-toolbar>
-      <h1 class="md-toolbar-tools">App Servers</h1>
-    </md-toolbar>
-    <md-list class="md-dense">
-      <md-list-item (click)="showFiles(server)" class="md-2-line" *ngFor="let server of appservers">
-        <p>{{server.name}}</p>
-        <md-slide-toggle color="accent" [(ngModel)]="server.connected" (change)="toggleConnected(server)"></md-slide-toggle>
-      </md-list-item>
-    </md-list>
-  </md-sidenav>
-
-  <button md-button (click)="start.toggle()">Toggle Start Side Drawer</button>
-
-
-
-</md-sidenav-layout>
- -->
