@@ -1,5 +1,14 @@
 # Change Log
 
+## [v1.0.0-alpha.3](https://github.com/paxtonhare/marklogic-debugger/tree/v1.0.0-alpha.3)
+
+[Full Changelog](https://github.com/paxtonhare/marklogic-debugger/compare/v1.0.0-alpha.2...v1.0.0-alpha.3)
+
+**Closed issues:**
+
+- Create a custom session name to avoid stomping on other appservers [\#9](https://github.com/paxtonhare/marklogic-debugger/issues/9)
+- Change to non-8080 port [\#8](https://github.com/paxtonhare/marklogic-debugger/issues/8)
+
 ## [v1.0.0-alpha.2](https://github.com/paxtonhare/marklogic-debugger/tree/v1.0.0-alpha.2) (2017-02-09)
 [Full Changelog](https://github.com/paxtonhare/marklogic-debugger/compare/1.0.0-alpha.1...v1.0.0-alpha.2)
 
