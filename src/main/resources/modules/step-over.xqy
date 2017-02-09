@@ -1,4 +1,4 @@
 declare variable $requestId external;
 
-dbg:next($requestId)
+dbg:next(xs:unsignedLong($requestId))
 

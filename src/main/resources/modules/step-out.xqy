@@ -1,3 +1,3 @@
 declare variable $requestId external;
 
-dbg:out($requestId)
+dbg:out(xs:unsignedLong($requestId))

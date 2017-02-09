@@ -2,6 +2,15 @@
   background-color: #f3f3ff;
 }
 
+/deep/ .mdl-card__supporting-text {
+  width: 100%;
+}
+
+h3 {
+  text-align: center;
+  width: 100%;
+}
+
 :host {
   margin-top: 4em;
   display: block;
@@ -9,6 +18,42 @@
 
 .login-box {
   width: 500px;
+  margin: 0pt auto;
+
+  form {
+    @-moz-document url-prefix() {
+      .fa {
+        position: relative;
+        top: -30px;
+      }
+
+      // mdl-textfield.mdl-textfield {
+      //   margin-top: 20px;
+      //   padding: 20px 0px 0px 0px;
+      // }
+    }
+
+    .fa {
+      margin-left: -14px;
+    }
+
+    .fa-times {
+      color: red;
+    }
+
+    .fa-check {
+      color: green;
+    }
+
+
+    .error {
+      background: rgba(255,0,0,0.5);
+      padding: 10px;
+      border-radius: 2px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+  }
 }
 
 .current-server {

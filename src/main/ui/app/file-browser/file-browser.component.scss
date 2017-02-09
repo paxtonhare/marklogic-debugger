@@ -1,3 +1,7 @@
+@import '../../styles/colors';
+
+$bg-color: unquote("rgb(#{$palette-debugger-50})");
+
 :not(.filetree) > .filetree {
   margin: 0px 0px 0px 5px;
 }
@@ -15,7 +19,7 @@
   li {
     cursor: pointer;
     &.active {
-      background-color: rgba(121,85,72,.15);
+      background-color: $bg-color;
     }
   }
 

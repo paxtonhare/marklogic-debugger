@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter } from '@angular/core';
-import { Headers, Http, RequestOptions } from '@angular/http';
+import { Headers, Http, RequestOptions, Response } from '@angular/http';
 
 import { AuthModel } from './auth.model';
 
@@ -8,21 +8,52 @@ export class AuthService {
   authenticated: EventEmitter<any> = new EventEmitter();
   redirectUrl: string;
 
+  AUTH_HOST: string = '_authed_host_';
+  AUTH_PORT: string = '_authed_port_';
+
   constructor(private http: Http) {}
 
   isAuthenticated() {
     return localStorage.getItem('_isAuthenticated_') === 'true';
   }
 
-  setAuthenticated(authed: boolean) {
+  get hostname() : string {
+    return localStorage.getItem(this.AUTH_HOST);
+  }
+
+  get port() : number {
+    return parseInt(localStorage.getItem(this.AUTH_PORT), 10);
+  }
+
+  setAuthenticated(authed: boolean, hostname: string, port: number) {
     localStorage.setItem('_isAuthenticated_', authed.toString());
+    if (hostname) {
+      localStorage.setItem(this.AUTH_HOST, hostname);
+    } else {
+      localStorage.removeItem(this.AUTH_HOST);
+    }
+
+    if (port) {
+      localStorage.setItem(this.AUTH_PORT, port.toString());
+    } else {
+      localStorage.removeItem(this.AUTH_PORT);
+    }
     this.authenticated.emit(authed);
   }
 
-  login(authInfo: AuthModel) {
-    // const params = `username=${authInfo.username}&password=${authInfo.password}&hostname=${authInfo.hostname}`;
+  checkServer(authInfo: AuthModel) {
+    return this.http.get(`/api/server/status?host=${authInfo.hostname}&port=${authInfo.port}`).map((resp: Response) => {
+      return resp.json();
+    });
+  }
 
-    const body = this.formData({ username: authInfo.username, password: authInfo.password, hostname: authInfo.hostname });
+  login(authInfo: AuthModel) {
+    const body = this.formData({
+      username: authInfo.username,
+      password: authInfo.password,
+      hostname: authInfo.hostname,
+      port: authInfo.port
+    });
     let headers = new Headers();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
     let options = new RequestOptions({
@@ -31,8 +62,9 @@ export class AuthService {
     });
     let resp = this.http.post('/api/user/login', body, options).share();
     resp.subscribe(() => {
-      this.setAuthenticated(true);
-    });
+      this.setAuthenticated(true, authInfo.hostname, authInfo.port);
+    },
+    (error) => {});
     return resp;
   }
 
@@ -42,24 +74,10 @@ export class AuthService {
     }).join('&');
   }
 
-  // login(authInfo: AuthModel) {
-  //   const params = {
-  //     hostname: authInfo.hostname,
-  //     username: authInfo.username,
-  //     password: authInfo.password,
-  //   };
-
-  //   let resp = this.http.post('/api/user/login', params).share();
-  //   resp.subscribe(() => {
-  //     this.setAuthenticated(true);
-  //   });
-  //   return resp;
-  // }
-
   logout() {
     let resp = this.http.delete('/api/user/logout').share();
     resp.subscribe(() => {
-      this.setAuthenticated(false);
+      this.setAuthenticated(false, null, null);
     });
     return resp;
   }

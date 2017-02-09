@@ -1,0 +1,38 @@
+/deep/ .mdl-dialog {
+  width: 500px;
+}
+
+/deep/ mdl-dialog-host-component {
+  padding: 0px;
+}
+
+.error-dialog {
+  min-width: 500px;
+  width: 500px;
+}
+
+pre {
+  width: 100%;
+  overflow: auto;
+}
+
+.mdl-dialog__title {
+
+  font-size: 1.5rem;
+
+  .mdl-button--fab.mdl-button--mini-fab {
+    height: 30px;
+    min-width: 30px;
+    width: 30px;
+  }
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  padding: 12px 24px 12px;
+
+  background-color: #222;
+
+  color: white;
+}

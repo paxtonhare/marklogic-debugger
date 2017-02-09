@@ -6,6 +6,7 @@ import { Component, ElementRef, Input, Output, EventEmitter } from '@angular/cor
   styleUrls: ['./file-browser.component.scss']
 })
 export class FileBrowserComponent {
+  @Input() selectedUri: string;
   @Input() currentChild: any;
   @Input() files: Array<any>;
   @Output() fileShown = new EventEmitter();
@@ -13,13 +14,6 @@ export class FileBrowserComponent {
 
   constructor(protected el: ElementRef) {
   }
-
-  // isRoot() {
-  //   return (this.el &&
-  //     this.el.nativeElement &&
-  //     this.el.nativeElement.parentElement &&
-  //     !this.el.nativeElement.parentElement.hasAttribute('root'));
-  // }
 
   getEntryIcon(child) {
     if (child.type === 'dir') {
@@ -29,13 +23,14 @@ export class FileBrowserComponent {
   }
 
   isSelected(child) {
-    return this.currentChild === child;
+    return this.selectedUri && (this.selectedUri === child.uri);
   }
 
   entryClicked(entry) {
     if (entry.type === 'dir') {
       entry.collapsed = !(!!entry.collapsed);
     } else {
+      this.selectedUri = entry.uri;
       this.currentChild = entry;
       this.fileShown.next(entry);
     }

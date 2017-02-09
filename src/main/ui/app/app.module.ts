@@ -14,9 +14,11 @@ import { FileBrowserComponent } from './file-browser';
 import { HeaderComponent } from './header';
 import { HomeComponent } from './home';
 import { LoginComponent } from './login';
+import { ErrorComponent } from './error';
 import { SubsectionComponent } from './subsection';
 import { MarkLogicService } from './marklogic';
 import { ROUTES } from './app.routes';
+import { StartupComponent } from './help';
 
 @NgModule({
   declarations: [
@@ -25,8 +27,10 @@ import { ROUTES } from './app.routes';
     HeaderComponent,
     HomeComponent,
     LoginComponent,
+    ErrorComponent,
     SubsectionComponent,
-    CodemirrorComponent
+    CodemirrorComponent,
+    StartupComponent
   ],
   imports: [
     BrowserModule,
@@ -36,6 +40,10 @@ import { ROUTES } from './app.routes';
     // MaterialModule.forRoot()
     MdlModule,
     GridManiaModule
+  ],
+  entryComponents: [
+    ErrorComponent,
+    StartupComponent
   ],
   providers: [
     AUTH_PROVIDERS,

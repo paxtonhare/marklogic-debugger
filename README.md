@@ -4,7 +4,7 @@ A stand alone debugger for MarkLogic Server. Simply download the war and run it.
 
 ## Using It
 
-Download the war file from the [releases page](https://github.com/marklogic/marklogic-data-hub/releases).
+Download the war file from the [releases page](https://github.com/paxtonhare/marklogic-debugger/releases).
 
 Run it with:
 

@@ -1,0 +1,31 @@
+$palette-debugger:
+"233,233,243"
+"199,200,225"
+"162,164,206"
+"124,128,186"
+"96,100,171"
+"68,73,156"
+"62,66,148"
+"53,57,138"
+"45,49,128"
+"31,33,110"
+"173,175,255"
+"122,125,255"
+"71,75,255"
+"45,50,255"
+;
+
+$palette-debugger-50: nth($palette-debugger, 1);
+$palette-debugger-100: nth($palette-debugger, 2);
+$palette-debugger-200: nth($palette-debugger, 3);
+$palette-debugger-300: nth($palette-debugger, 4);
+$palette-debugger-400: nth($palette-debugger, 5);
+$palette-debugger-500: nth($palette-debugger, 6);
+$palette-debugger-600: nth($palette-debugger, 7);
+$palette-debugger-700: nth($palette-debugger, 8);
+$palette-debugger-800: nth($palette-debugger, 9);
+$palette-debugger-900: nth($palette-debugger, 10);
+$palette-debugger-A100: nth($palette-debugger, 11);
+$palette-debugger-A200: nth($palette-debugger, 12);
+$palette-debugger-A400: nth($palette-debugger, 13);
+$palette-debugger-A700: nth($palette-debugger, 14);

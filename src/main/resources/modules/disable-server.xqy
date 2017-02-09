@@ -1,3 +1,3 @@
 declare variable $serverId external;
 
-dbg:disconnect($serverId)
+dbg:disconnect(xs:unsignedLong($serverId))

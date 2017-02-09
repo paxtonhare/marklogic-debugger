@@ -54,8 +54,9 @@ public class MarkLogicAuthenticationManager implements AuthenticationProvider, A
         String username = token.getPrincipal().toString();
         String password = token.getCredentials().toString();
         String hostname = token.getHostname().toString();
+        int port = Integer.parseInt(token.getPort().toString());
 
-        if (username == "" || password == "" || hostname == "") {
+        if (username == "" || password == "" || hostname == "" || port == 0) {
           throw new BadCredentialsException("Invalid credentials");
         }
         /**
@@ -63,6 +64,7 @@ public class MarkLogicAuthenticationManager implements AuthenticationProvider, A
          * authenticating users over and over.
          */
         restConfig.setHost(hostname);
+        restConfig.setRestPort(port);
         RestClient client = new RestClient(restConfig, new SimpleCredentialsProvider(username, password));
         URI uri = client.buildUri(pathToAuthenticateAgainst, null);
         try {
@@ -78,7 +80,7 @@ public class MarkLogicAuthenticationManager implements AuthenticationProvider, A
         }
 
         return new ConnectionAuthenticationToken(token.getPrincipal(), token.getCredentials(),
-                token.getHostname(), token.getAuthorities());
+                token.getHostname(), token.getPort(), token.getAuthorities());
     }
 
     public void setPathToAuthenticateAgainst(String pathToAuthenticateAgainst) {

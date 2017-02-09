@@ -25,6 +25,10 @@ export class MarkLogicService {
     return this.get('/api/servers/' + serverId + '/files');
   }
 
+  getSystemFiles() {
+    return this.get('/api/marklogic/files');
+  }
+
   getFile(serverId, uri) {
     let options: RequestOptionsArgs = {
       headers: new Headers({'Accept': 'text/plain'})
@@ -33,6 +37,10 @@ export class MarkLogicService {
     return this.http.get(url, options).map((resp: Response) => {
       return resp.text();
     });
+  }
+
+  getServerEnabled(serverId) {
+    return this.get(`/api/servers/${serverId}`);
   }
 
   getAttached(serverId) {
@@ -88,6 +96,17 @@ export class MarkLogicService {
     this.setBreakpoints(server, uri, breakpoints);
   }
 
+  toggleBreakpoint(server: string, uri: string, line: number) {
+    let breakpoints = this.getBreakpoints(server, uri);
+    let breakpoint = _.find(breakpoints, (breakpoint: Breakpoint) => {
+      return breakpoint.uri === uri && breakpoint.line === line;
+    });
+    if (breakpoint) {
+      breakpoint.enabled = !breakpoint.enabled;
+      this.setBreakpoints(server, uri, breakpoints);
+    }
+  }
+
   disableBreakpoint(server: string, uri: string, line: number) {
     let breakpoints: Array<Breakpoint> = this.getBreakpoints(server, uri);
     _.remove(breakpoints, (bp) => { return bp.line === line; });
@@ -99,7 +118,8 @@ export class MarkLogicService {
   }
 
   sendBreakpoints(requestId: any, breakpoints: Array<Breakpoint>) {
-    return this.http.post(`/api/requests/${requestId}/breakpoints`, breakpoints);
+    let onOnly = _.filter(breakpoints, { enabled: true });
+    return this.http.post(`/api/requests/${requestId}/breakpoints`, onOnly);
   }
 
   evalExpression(requestId: any, expression: string) {
@@ -110,7 +130,7 @@ export class MarkLogicService {
 
   valueExpression(requestId: any, expression: string) {
     return this.http.post(`/api/requests/${requestId}/value`, expression).map((resp: Response) => {
-      return resp.text();
+      return resp.json();
     });
   }
 

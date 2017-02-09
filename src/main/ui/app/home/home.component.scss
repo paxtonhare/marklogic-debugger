@@ -1,16 +1,41 @@
+@import '../../styles/colors';
+
+$hover-color: unquote("rgb(#{$palette-debugger-50})");
+
 /deep/ .CodeMirror {
   height: 100%;
-  .current-line {
-    background-color: rgba(128,128,128,0.1);
+
+  .current-statement {
+    background-color: $hover-color;
   }
 }
 
-/deep/ .breakpoints {
-  width: .8em;
+.fill-height {
+  height: 100%;
+  position: relative;
 }
 
-/deep/ .breakpoint {
+/deep/ .breakpoints {
+  width: 1.5em;
+
+  .section-body {
+    padding: 10px;
+  }
+}
+
+/deep/ .currentlines {
+  width: 1.5em;
+}
+
+/deep/ .breakpoint-enabled {
   color: #822;
+  font-size: 14pt;
+  font-weight: bold;
+  position: relative;
+}
+
+/deep/ .breakpoint-disabled {
+  color: #666;
   font-size: 14pt;
   font-weight: bold;
   position: relative;
@@ -20,9 +45,61 @@
   height: 100%;
 }
 
+.breakpoints {
+  ul {
+    margin: 0;
+    padding: 0px;
+    list-style: none;
+    cursor: default;
+
+    .breakpoint-symbol {
+      cursor: pointer;
+      color: #666;
+
+      &.enabled {
+        color: #822;
+      }
+    }
+
+    .fa-times {
+      float: right;
+
+      &:hover {
+        color: red;
+      }
+    }
+
+    li {
+      padding: 5px;
+      &:hover {
+        background-color: $hover-color;
+      }
+    }
+  }
+}
+
 .attached {
-  li {
-    cursor: pointer;
+  ul {
+    margin: 0;
+    padding: 0px;
+    list-style: none;
+
+    li {
+      &:hover {
+        background-color: $hover-color;
+      }
+      padding: 5px;
+
+      cursor: pointer;
+
+      .request-id {
+        font-size: 60%;
+      }
+    }
+  }
+
+  .section-body {
+    padding: 10px;
   }
 }
 
@@ -41,13 +118,32 @@
   color: #333;
   padding: 10px;
   border-bottom: 1px solid #ccc;
-  // position: fixed;
-  // width: 100%;
-  // z-index: 999;
 }
 
 .files {
   min-width: 250px;
+
+  .section-body {
+    position: absolute;
+    top: 41px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    overflow: auto;
+  }
+
+  .debug-status {
+    display: inline;
+    float: right;
+
+    mdl-switch.mdl-switch.is-upgraded {
+      padding-left: 28px;
+      display: inline;
+      margin-right: 20px;
+      top: -5px;
+    }
+  }
+
 }
 
 
@@ -61,11 +157,48 @@
 }
 
 .debug-area {
-  min-height: 100px;
+  min-height: 150px;
+
+  .debugger {
+    position: relative;
+
+    .disabled {
+      position: absolute;
+      top: 0px;
+      bottom: 0px;
+      left: 0px;
+      right: 0px;
+      background: rgba(255,255,255, 0.90);
+      z-index: 10000;
+
+      span {
+        display: inline-block;
+        width: 100%;
+        font-weight: bold;
+        margin: auto;
+        text-align: center;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+  }
 
   .clickable {
     color: #666;
+    width: 20px;
+    height: 20px;
+    margin: auto;
+    display: inline-block;
+    border-radius: 2px;
+    cursor: default;
+
+    /deep/ mdl-icon {
+      font-size: 20px;
+    }
     &:hover {
+      background-color: rgba(0,0,0,0.05);
       color: black;
     }
   }
@@ -91,6 +224,13 @@
 ul.frames {
   list-style: none;
   padding: 0px 10px;
+
+  li {
+    cursor: default;
+    &:hover {
+      background-color: $hover-color;
+    }
+  }
 }
 
 .mdl-layout__header {
@@ -104,6 +244,10 @@ ul.frames {
   .mdl-switch {
     width: initial;
   }
+
+  .selected-server {
+    margin-right: 20px;
+  }
 }
 
 .flex-70 {
@@ -113,11 +257,6 @@ ul.frames {
     left: 0;
     right: 0;
     position: absolute;
-  }
-
-  .fill-height {
-    height: 100%;
-    position: relative;
   }
 
   app-codemirror {
@@ -135,17 +274,48 @@ ul.frames {
   margin-left: 5px;
 }
 
+.no-request {
+  padding: 20px;
+  color: #666;
+}
+
 .console-input {
   border: none;
   background: transparent;
+  width: 60%;
+
   &:focus {
     outline: 0;
+  }
+
+  .prompt {
+    color: #333;
   }
 }
 
 .console-output {
+  color: #666;
+
   .prompt {
-    color: #333;
+    color: #666;
+  }
+
+  .error {
+    background-color: rgba(255, 0, 0, 0.5);
+    padding: 5px;
+    border-radius: 5px;
+    color: black;
+    width: 100%;
+    display: inline-block;
+
+    a {
+      cursor: pointer;
+    }
+
+    pre {
+      width: 100%;
+      white-space: pre-wrap;
+    }
   }
 }
 

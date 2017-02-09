@@ -136,7 +136,8 @@ public class Config extends WebSecurityConfigurerAdapter {
 			"/*.eot",
 			"/*.css",
 			"/",
-			"/index.html"
+			"/index.html",
+			"/api/server/status"
 		};
 	}
 }

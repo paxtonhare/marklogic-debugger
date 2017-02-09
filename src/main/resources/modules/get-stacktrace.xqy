@@ -14,7 +14,7 @@ declare function local:build-var-array($vars) {
     $array
 };
 
-let $stack := dbg:stack($requestId)
+let $stack := dbg:stack(xs:unsignedLong($requestId))
 let $e := json:array()
 let $_ :=
   for $expr in $stack/*:expr

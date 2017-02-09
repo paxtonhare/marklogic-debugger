@@ -1,3 +1,3 @@
 declare variable $serverId external;
 
-dbg:connect($serverId)
+dbg:connect(xs:unsignedLong($serverId))

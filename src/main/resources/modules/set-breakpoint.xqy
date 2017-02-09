@@ -1,34 +1,24 @@
-(:declare variable $serverId external;
-declare variable $uri external;
-declare variable $line external;
-:)
-
 declare variable $serverId external;
 declare variable $uri external;
 declare variable $line external;
-(:let $serverId := 12693404844329926599:)
 
-(:let $uri := "/com.marklogic.hub/collectors/query.xqy"
-let $line := 36:)
-let $modules-db := xdmp:server-modules-database($serverId)
+let $modules-db := xdmp:server-modules-database(xs:unsignedLong($serverId))
 return
   let $results := dbg:eval('
     declare variable $uri external;
     declare variable $line external;
-    xdmp:request(),
-    dbg:line(xdmp:request(), $uri, $line)
+    let $request := xdmp:request()
+    let $expressions := dbg:line($request, $uri, $line) ! dbg:expr($request, .)
+    return
+      (($expressions[dbg:line = $line])[1], $expressions[1])[1]/dbg:expr-id/fn:data()
   ',
   (
     xs:QName("uri"), $uri,
-    xs:QName("line"), $line
+    xs:QName("line"), xs:unsignedInt($line)
   ),
   map:new((
     map:entry("modules", $modules-db)
   )))
   let $request := $results[1]
-  (:let $_ := dbg:continue($request):)
   return
     $results
-
-
-(:dbg:break($request as xs:unsignedLong, $expression as xs:unsignedLong):)
