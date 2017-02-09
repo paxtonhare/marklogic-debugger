@@ -177,10 +177,10 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
         font-weight: bold;
         margin: auto;
         text-align: center;
+        position: absolute;
         top: 50%;
-        transform: translate(0, -50%);
-        position: relative;
-        background: rgba(255,255,255, 0.75);
+        left: 50%;
+        transform: translate(-50%, -50%);
       }
     }
   }
