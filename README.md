@@ -12,11 +12,11 @@ Run it with:
 
 `java -jar marklogic-debugger.war`
 
-Open your browser to [http://localhost:8080](http://localhost:8080)
+Open your browser to [http://localhost:9999](http://localhost:9999)
 
 ##### Changing the port
 
-Want to use a port other than 8080? Run it like this:
+Want to use a port other than 9999? Run it like this:
 
 `java -jar marklogic-debugger.war --server.port=8090`
 
