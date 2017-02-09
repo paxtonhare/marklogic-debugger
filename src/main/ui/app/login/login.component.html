@@ -1,6 +1,7 @@
 <div class="mdl-grid">
-  <div class="mdl-cell mdl-cell--4-col"></div>
-  <div class="mdl-cell mdl-cell--4-col">
+  <div class="mdl-cell mdl-cell--3-col"></div>
+  <div class="mdl-cell mdl-cell--6-col">
+    <h3>MarkLogic Debugger</h3>
     <mdl-card *ngIf="!appServers" mdl-shadow="2" class="login-box">
       <mdl-card-supporting-text>
         <form flex layout="column" (ngSubmit)="login()">
@@ -18,7 +19,7 @@
           <div>
             <i *ngIf="serverOk" class="fa fa-check"></i>
             <i *ngIf="!serverOk" class="fa fa-times"></i>
-            <mdl-textfield label="MarkLogic Port" floating-label type="number" [ngModel]="authInfo.port" (ngModelChange)="updatePort($event)" name="port" md-autofocus required="required"></mdl-textfield>
+            <mdl-textfield label="MarkLogic Port (8000 for 8.0 and up. XCC for < 8.0)" floating-label type="number" [ngModel]="authInfo.port" (ngModelChange)="updatePort($event)" name="port" md-autofocus required="required"></mdl-textfield>
           </div>
           <div>
             <mdl-textfield label="User Name" floating-label type="text" [(ngModel)]="authInfo.username" name="username" required="required"></mdl-textfield>
@@ -53,6 +54,6 @@
       </mdl-card-supporting-text>
     </mdl-card>
   </div>
-  <div class="mdl-cell mdl-cell--4-col"></div>
+  <div class="mdl-cell mdl-cell--3-col"></div>
 </div>
 

@@ -6,6 +6,11 @@
   width: 100%;
 }
 
+h3 {
+  text-align: center;
+  width: 100%;
+}
+
 :host {
   margin-top: 4em;
   display: block;
@@ -13,6 +18,7 @@
 
 .login-box {
   width: 500px;
+  margin: 0pt auto;
 
   .fa-times {
     color: red;
