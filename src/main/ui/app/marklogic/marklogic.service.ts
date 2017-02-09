@@ -39,6 +39,10 @@ export class MarkLogicService {
     });
   }
 
+  getServerEnabled(serverId) {
+    return this.get(`/api/servers/${serverId}`);
+  }
+
   getAttached(serverId) {
     return this.get(`/api/servers/${serverId}/attached`);
   }

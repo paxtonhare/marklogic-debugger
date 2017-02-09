@@ -1,0 +1,22 @@
+<div class="error-dialog">
+  <div class="mdl-dialog__content">
+    <h4>Welcome to the MarkLogic Debugger!</h4>
+    <div>
+      <p>To get started turn on debugging above. <mdl-switch class="debug-instructions" [ngModel]="true" disabled></mdl-switch>
+      </p>
+      <p>The next time you run your code MarkLogic will stop automatically
+      at the first instruction.</p>
+      <p>Press the refresh arrow <i class="fa fa-repeat"></i> in the Requests pane to show all
+      of the waiting requests. Simply click on one to start debugging.
+      </p>
+      <p>Don't forget to turn off debugging when you are finished!</p>
+      <p>This help is available from the top right menu. Simply click on the <button class="help-button" mdl-button mdl-button-type="icon" disabled mdl-ripple><mdl-icon>more_vert</mdl-icon></button> button.
+    </div>
+  </div>
+  <div class="mdl-dialog__actions">
+    <mdl-checkbox [(ngModel)]="showOnStartup">
+      Show this message on Startup
+    </mdl-checkbox>
+    <button mdl-button (click)="cancel()" mdl-button-type="raised" mdl-colored="primary" mdl-ripple>Ok</button>
+  </div>
+</div>

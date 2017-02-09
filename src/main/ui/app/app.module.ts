@@ -18,6 +18,7 @@ import { ErrorComponent } from './error';
 import { SubsectionComponent } from './subsection';
 import { MarkLogicService } from './marklogic';
 import { ROUTES } from './app.routes';
+import { StartupComponent } from './help';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { ROUTES } from './app.routes';
     LoginComponent,
     ErrorComponent,
     SubsectionComponent,
-    CodemirrorComponent
+    CodemirrorComponent,
+    StartupComponent
   ],
   imports: [
     BrowserModule,
@@ -40,7 +42,8 @@ import { ROUTES } from './app.routes';
     GridManiaModule
   ],
   entryComponents: [
-    ErrorComponent
+    ErrorComponent,
+    StartupComponent
   ],
   providers: [
     AUTH_PROVIDERS,

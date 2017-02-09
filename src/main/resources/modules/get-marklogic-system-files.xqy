@@ -23,6 +23,7 @@ declare function local:get-system-dirs($dir as xs:string, $a as json:array) {
     let $_ := local:get-system-dirs($entry/dir:pathname, $children)
     let $_ := local:get-system-files($entry/dir:pathname, $children)
     let $_ := map:put($o, "name", fn:string($entry/dir:filename))
+    let $_ := map:put($o, "uri", fn:replace($entry/dir:pathname, $ml-dir, ""))
     let $_ := map:put($o, "type", "dir")
     let $_ := map:put($o, "collapsed", fn:true())
     let $_ := map:put($o, "children", $children)
@@ -33,6 +34,7 @@ declare function local:get-system-dirs($dir as xs:string, $a as json:array) {
 let $obj :=
   let $o := json:object()
   let $_ := map:put($o, "name", "/MarkLogic")
+  let $_ := map:put($o, "uri", $ml-dir)
   let $_ := map:put($o, "type", "dir")
   let $_ := map:put($o, "collapsed", fn:true())
   let $children := json:array()

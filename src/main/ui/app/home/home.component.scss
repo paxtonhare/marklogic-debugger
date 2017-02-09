@@ -1,21 +1,13 @@
+@import '../../styles/colors';
+
+$hover-color: unquote("rgb(#{$palette-debugger-50})");
+
 /deep/ .CodeMirror {
   height: 100%;
-  .current-line {
-    background-color: rgba(128,128,128,0.1);
-  }
 
   .current-statement {
-    background-color: rgba(255,0,0,0.2);
+    background-color: rgba(0, 128, 0, 0.1);
   }
-}
-
-// /deep/ .mdl-switch.is-checked .mdl-switch__track {
-//   // background: rgba(0,0,0, 0.26);
-// }
-
-/deep/ .mdl-layout__header {
-  background-color: #222;
-  border-color: #080808;
 }
 
 /deep/ .breakpoints {
@@ -26,6 +18,10 @@
   }
 }
 
+/deep/ .currentlines {
+  width: 1.5em;
+}
+
 /deep/ .breakpoint-enabled {
   color: #822;
   font-size: 14pt;
@@ -34,7 +30,7 @@
 }
 
 /deep/ .breakpoint-disabled {
-  color: #ccc;
+  color: #666;
   font-size: 14pt;
   font-weight: bold;
   position: relative;
@@ -47,13 +43,13 @@
 .breakpoints {
   ul {
     margin: 0;
-    padding: 10px;
+    padding: 0px;
     list-style: none;
     cursor: default;
 
     .breakpoint-symbol {
       cursor: pointer;
-      color: #ddd;
+      color: #666;
 
       &.enabled {
         color: #822;
@@ -68,8 +64,11 @@
       }
     }
 
-    &:hover {
-      background-color: #fafafa;
+    li {
+      padding: 5px;
+      &:hover {
+        background-color: $hover-color;
+      }
     }
   }
 }
@@ -77,14 +76,15 @@
 .attached {
   ul {
     margin: 0;
-    padding: 10px;
+    padding: 0px;
     list-style: none;
 
-    &:hover {
-      background-color: rgba(128,128,128,0.25);
-    }
-
     li {
+      &:hover {
+        background-color: $hover-color;
+      }
+      padding: 5px;
+
       cursor: pointer;
 
       .request-id {
@@ -113,13 +113,23 @@
   color: #333;
   padding: 10px;
   border-bottom: 1px solid #ccc;
-  // position: fixed;
-  // width: 100%;
-  // z-index: 999;
 }
 
 .files {
   min-width: 250px;
+
+  .debug-status {
+    display: inline;
+    float: right;
+
+    mdl-switch.mdl-switch.is-upgraded {
+      padding-left: 28px;
+      display: inline;
+      margin-right: 20px;
+      top: -5px;
+    }
+  }
+
 }
 
 
@@ -189,6 +199,13 @@
 ul.frames {
   list-style: none;
   padding: 0px 10px;
+
+  li {
+    cursor: default;
+    &:hover {
+      background-color: $hover-color;
+    }
+  }
 }
 
 .mdl-layout__header {
@@ -203,24 +220,8 @@ ul.frames {
     width: initial;
   }
 
-  .server {
-    font-size: 12px;
-    margin-right: 20px;
-  }
-
   .selected-server {
     margin-right: 20px;
-  }
-
-  .debug-toggle {
-    border: 1px solid rgba(255,255,255,0.25);
-    padding: 2px;
-    display: inline-block;
-
-    .debug-status {
-      margin-left: 20px;
-      font-size: 14px;
-    }
   }
 }
 

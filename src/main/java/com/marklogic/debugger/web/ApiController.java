@@ -103,6 +103,15 @@ public class ApiController {
 				return evalQuery(auth, "enable-server.xqy", hm);
 		}
 
+		@RequestMapping(value = "/servers/{serverId}", method = RequestMethod.GET)
+		@ResponseBody
+		public String isServerEnabled(@PathVariable String serverId) throws InvalidRequestException {
+			ConnectionAuthenticationToken auth = (ConnectionAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
+			HashMap<String, String> hm = new HashMap<>();
+			hm.put("serverId", serverId);
+			return evalQuery(auth, "is-server-enabled.xqy", hm);
+		}
+
 		@RequestMapping(value = "/servers/{serverId}/disable", method = RequestMethod.GET)
 		@ResponseBody
 		public String disableServer(@PathVariable String serverId) throws InvalidRequestException {
@@ -287,6 +296,9 @@ public class ApiController {
 						throw new InvalidRequestException();
 					}
 					throw new RuntimeException(e);
+				}
+				catch(Exception e) {
+					e.printStackTrace();
 				}
 			}
 			return result;

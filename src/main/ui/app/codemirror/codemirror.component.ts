@@ -43,7 +43,8 @@ export class CodemirrorComponent implements OnInit, OnChanges {
   @ViewChild('host') host;
 
   private _value = '';
-  private _line: number;
+  private _line: number = null;
+  private _showLine: number = null;
   private _expression: string;
 
   private currentStatement: CodeMirror.TextMarker;
@@ -65,15 +66,30 @@ export class CodemirrorComponent implements OnInit, OnChanges {
     }
     this._line = l - 1;
     if (this.instance) {
-      this.jumpToLine();
+      this.instance.clearGutter('currentlines');
+      this.instance.setGutterMarker(this._line, 'currentlines', this.makeLineMarker());
+      this.jumpToLine(this._line);
       this.highlightExpression();
+    }
+  }
+
+  get showLine(): number { return this._showLine + 1; };
+  @Input() set showLine(l: number) {
+    if (l === null) {
+      this._showLine = null;
+      return;
+    }
+
+    this._showLine = l - 1;
+    if (this.instance) {
+      this.jumpToLine(this._showLine);
     }
   }
 
   get expression(): string { return this._expression; }
   @Input() set expression(e: string) {
     this._expression = e;
-    this.jumpToLine();
+    this.jumpToLine(this._line);
     this.highlightExpression();
   }
 
@@ -95,11 +111,18 @@ export class CodemirrorComponent implements OnInit, OnChanges {
     this.instance = CodeMirror.fromTextArea(this.host.nativeElement, config);
     this.instance.on('change', () => {
       this.updateValue(this.instance.getValue());
+      if (this._line !== null) {
+        this.line = this._line + 1;
+      }
     });
     setTimeout(() => {
       this.instance.refresh();
       if (this.line !== null) {
-        this.jumpToLine();
+        if (this._showLine) {
+          this.jumpToLine(this._showLine);
+        } else {
+          this.jumpToLine(this._line);
+        }
         this.highlightExpression();
       }
     }, 250);
@@ -110,10 +133,17 @@ export class CodemirrorComponent implements OnInit, OnChanges {
 
   }
 
-  makeMarker(enabled: boolean) {
+  makeBreakpoint(enabled: boolean) {
     const marker = document.createElement('div');
     marker.className = 'breakpoint' + (enabled ? '-enabled' : '-disabled');
     marker.innerHTML = '◉';
+    return marker;
+  }
+
+  makeLineMarker() {
+    const marker = document.createElement('div');
+    marker.className = 'current-line';
+    marker.innerHTML = '➡';
     return marker;
   }
 
@@ -133,7 +163,7 @@ export class CodemirrorComponent implements OnInit, OnChanges {
       this.instance.clearGutter('breakpoints');
       if (this.breakpoints) {
         for (let breakpoint of this.breakpoints) {
-          this.instance.setGutterMarker(breakpoint.line, 'breakpoints', this.makeMarker(breakpoint.enabled));
+          this.instance.setGutterMarker(breakpoint.line, 'breakpoints', this.makeBreakpoint(breakpoint.enabled));
         }
       }
     }
@@ -146,7 +176,7 @@ export class CodemirrorComponent implements OnInit, OnChanges {
     this._value = value || '';
     if (this.instance) {
       this.instance.setValue(this._value);
-      this.jumpToLine();
+      this.jumpToLine(this._line);
       this.onChange(value);
       if (this.instance) {
         this.highlightExpression();
@@ -155,9 +185,9 @@ export class CodemirrorComponent implements OnInit, OnChanges {
   }
 
 
-  jumpToLine() {
-    if (this.instance && this._line && this._value !== '') {
-      this.instance.scrollIntoView({line: this._line, ch: 0}, 20);
+  jumpToLine(line: number) {
+    if (this.instance && line && this._value !== '') {
+      this.instance.scrollIntoView({line: line, ch: 0}, 40);
     }
   }
 
@@ -177,7 +207,7 @@ export class CodemirrorComponent implements OnInit, OnChanges {
     let endLine = -1;
     let endChar = -1;
     let pos = 0;
-    let i = 0;
+    let i = this._line;
     let j = 0;
 
     let state = 'scanning';
@@ -217,11 +247,15 @@ export class CodemirrorComponent implements OnInit, OnChanges {
     while (state !== 'done' && peak() !== null) {
       switch(state) {
         case 'scanning':
-          if (peak() === this._expression[pos]) {
-            state = 'start';
-            startLine = i;
-            startChar = j;
-            eatExpr();
+          if (peak() === this._expression[pos] ||
+              (this._expression.substring(pos).startsWith("fn:") && peak() === this._expression[pos + "fn:".length]) ||
+              (this._expression.substring(pos).startsWith("fn:unordered(") && peak() === this._expression[pos + "fn:unordered(".length]) ||
+              (this._expression.substring(pos).startsWith("descendant::") && peak() === this._expression[pos + "descendant::".length])
+             ) {
+              state = 'start';
+              startLine = i;
+              startChar = j;
+              eatExpr();
           }
           eat();
           break;
@@ -281,6 +315,10 @@ export class CodemirrorComponent implements OnInit, OnChanges {
           } else if (this._expression[pos] === ')') {
             eatExpr();
             continue;
+          } else if (this._expression.substring(pos).startsWith('..."')) {
+            if (peak() === '"' || peak() === '\'') {
+              pos += '..."'.length;
+            }
           } else {
             reset();
           }

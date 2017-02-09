@@ -8,6 +8,9 @@ export class AuthService {
   authenticated: EventEmitter<any> = new EventEmitter();
   redirectUrl: string;
 
+  AUTH_HOST: string = '_authed_host_';
+  AUTH_PORT: string = '_authed_port_';
+
   constructor(private http: Http) {}
 
   isAuthenticated() {
@@ -15,17 +18,26 @@ export class AuthService {
   }
 
   get hostname() : string {
-    return localStorage.getItem('_authed_host_');
+    return localStorage.getItem(this.AUTH_HOST);
   }
 
   get port() : number {
-    return parseInt(localStorage.getItem('_authed_port_'), 10);
+    return parseInt(localStorage.getItem(this.AUTH_PORT), 10);
   }
 
   setAuthenticated(authed: boolean, hostname: string, port: number) {
     localStorage.setItem('_isAuthenticated_', authed.toString());
-    localStorage.setItem('_authed_host_', hostname);
-    localStorage.setItem('_authed_port_', port.toString());
+    if (hostname) {
+      localStorage.setItem(this.AUTH_HOST, hostname);
+    } else {
+      localStorage.removeItem(this.AUTH_HOST);
+    }
+
+    if (port) {
+      localStorage.setItem(this.AUTH_PORT, port.toString());
+    } else {
+      localStorage.removeItem(this.AUTH_PORT);
+    }
     this.authenticated.emit(authed);
   }
 
@@ -62,24 +74,10 @@ export class AuthService {
     }).join('&');
   }
 
-  // login(authInfo: AuthModel) {
-  //   const params = {
-  //     hostname: authInfo.hostname,
-  //     username: authInfo.username,
-  //     password: authInfo.password,
-  //   };
-
-  //   let resp = this.http.post('/api/user/login', params).share();
-  //   resp.subscribe(() => {
-  //     this.setAuthenticated(true);
-  //   });
-  //   return resp;
-  // }
-
   logout() {
     let resp = this.http.delete('/api/user/logout').share();
     resp.subscribe(() => {
-      this.setAuthenticated(false);
+      this.setAuthenticated(false, null, null);
     });
     return resp;
   }
