@@ -144,6 +144,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   getAttached() {
     this.marklogic.getAttached(this.selectedServer.id).subscribe((attached: any) => {
       this.attached = attached;
+    },() => {
+      this.attached = null;
     });
   }
 
@@ -229,17 +231,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.isServerEnabled();
   }
 
-  isServerEnabled() {
-    this.marklogic.getServerEnabled(this.selectedServer.id).subscribe((resp) => {
-      if (!resp.enabled) {
-        let res = this.dialogService.alert(`Debugging is no longer enabled. Try again.`);
-        res.subscribe(() => {
-          this.router.navigate(['server', this.appserverName]);
-        });
-      }
-    }
-  }
-
   setBreakpoints() {
     if (!this.breakpointsSet && Object.keys(this.breakpoints).length > 0) {
       this.breakpointsSet = true;
@@ -307,6 +298,17 @@ export class HomeComponent implements OnInit, OnDestroy {
   disableServer(server) {
     this.marklogic.disableServer(server.id).subscribe(() => {
       server.connected = false;
+    });
+  }
+
+  isServerEnabled() {
+    this.marklogic.getServerEnabled(this.selectedServer.id).subscribe((resp) => {
+      if (!resp.enabled) {
+        let res = this.dialogService.alert(`Debugging is no longer enabled. Try again.`);
+        res.subscribe(() => {
+          this.router.navigate(['server', this.appserverName]);
+        });
+      }
     });
   }
 

@@ -10,6 +10,11 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
   }
 }
 
+.fill-height {
+  height: 100%;
+  position: relative;
+}
+
 /deep/ .breakpoints {
   width: 1.5em;
 
@@ -118,6 +123,15 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
 .files {
   min-width: 250px;
 
+  .section-body {
+    position: absolute;
+    top: 41px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    overflow: auto;
+  }
+
   .debug-status {
     display: inline;
     float: right;
@@ -178,6 +192,7 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
     margin: auto;
     display: inline-block;
     border-radius: 2px;
+    cursor: default;
 
     /deep/ mdl-icon {
       font-size: 20px;
@@ -242,11 +257,6 @@ ul.frames {
     left: 0;
     right: 0;
     position: absolute;
-  }
-
-  .fill-height {
-    height: 100%;
-    position: relative;
   }
 
   app-codemirror {

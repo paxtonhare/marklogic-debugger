@@ -20,20 +20,39 @@ h3 {
   width: 500px;
   margin: 0pt auto;
 
-  .fa-times {
-    color: red;
-  }
+  form {
+    @-moz-document url-prefix() {
+      .fa {
+        position: relative;
+        top: -30px;
+      }
 
-  .fa-check {
-    color: green;
-  }
+      // mdl-textfield.mdl-textfield {
+      //   margin-top: 20px;
+      //   padding: 20px 0px 0px 0px;
+      // }
+    }
 
-  .error {
-    background: rgba(255,0,0,0.5);
-    padding: 10px;
-    border-radius: 2px;
-    color: #333;
-    margin-bottom: 20px;
+    .fa {
+      margin-left: -14px;
+    }
+
+    .fa-times {
+      color: red;
+    }
+
+    .fa-check {
+      color: green;
+    }
+
+
+    .error {
+      background: rgba(255,0,0,0.5);
+      padding: 10px;
+      border-radius: 2px;
+      color: #333;
+      margin-bottom: 20px;
+    }
   }
 }
 
