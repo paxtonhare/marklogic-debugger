@@ -1,6 +1,8 @@
-# MarklogicDebugger
+# Marklogic Debugger
 
-A stand alone debugger for MarkLogic Server. Simply download the war and run it. Then point to your MarkLogic Server and start debugging.
+A stand alone debugger for MarkLogic Server. Simply download the war and run it. Then point to your MarkLogic Server and start debugging. Nothing gets installed in MarkLogic.
+
+**_Should_** work with all versions of MarkLogic. Tested with 7, 8, and 9.
 
 ## Using It
 
