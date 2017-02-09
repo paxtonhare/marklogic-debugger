@@ -12,6 +12,12 @@ Run it with:
 
 Open your browser to [http://localhost:8080](http://localhost:8080)
 
+##### Changing the port
+
+Want to use a port other than 8080? Run it like this:
+
+`java -jar marklogic-debugger.war --server.port=8090`
+
 ## Building From Source
 
 Want to contribute? Perhaps you just want to poke the code?
