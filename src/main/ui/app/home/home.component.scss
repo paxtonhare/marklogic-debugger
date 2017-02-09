@@ -6,7 +6,7 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
   height: 100%;
 
   .current-statement {
-    background-color: rgba(0, 128, 0, 0.1);
+    background-color: $hover-color;
   }
 }
 
@@ -173,7 +173,17 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
 
   .clickable {
     color: #666;
+    width: 20px;
+    height: 20px;
+    margin: auto;
+    display: inline-block;
+    border-radius: 2px;
+
+    /deep/ mdl-icon {
+      font-size: 20px;
+    }
     &:hover {
+      background-color: rgba(0,0,0,0.05);
       color: black;
     }
   }
