@@ -59,6 +59,10 @@
   flex-direction: row;
 }
 
+/deep/ .flex {
+  display: flex;
+}
+
 @mixin flex-widths($name: null) {
   $flexName: 'flex';
   @for $i from 0 through 20 {

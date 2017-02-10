@@ -1,4 +1,3 @@
-// Imports
 import {
   Component,
   Input,
@@ -247,17 +246,31 @@ export class CodemirrorComponent implements OnInit, OnChanges {
     while (state !== 'done' && peak() !== null) {
       switch(state) {
         case 'scanning':
-          if (peak() === this._expression[pos] ||
-              (this._expression.substring(pos).startsWith("fn:") && peak() === this._expression[pos + "fn:".length]) ||
-              (this._expression.substring(pos).startsWith("fn:unordered(") && peak() === this._expression[pos + "fn:unordered(".length]) ||
-              (this._expression.substring(pos).startsWith("descendant::") && peak() === this._expression[pos + "descendant::".length])
-             ) {
-              state = 'start';
-              startLine = i;
-              startChar = j;
-              eatExpr();
+          if (peak() === this._expression[pos]) {
+            state = 'start';
+            startLine = i;
+            startChar = j;
+            eatExpr();
+            eat();
+          } else if (this._expression.substring(pos).startsWith('fn:') && peak() === this._expression[pos + 'fn:'.length]) {
+            state = 'start';
+            startLine = i;
+            startChar = j;
+            pos += 'fn:'.length;
+          } else if (this._expression.substring(pos).startsWith('fn:unordered(') && peak() === this._expression[pos + 'fn:unordered('.length]) {
+            state = 'start';
+            startLine = i;
+            startChar = j;
+            pos += 'fn:unordered('.length;
+          } else if (this._expression.substring(pos).startsWith('descendant::') && peak() === this._expression[pos + 'descendant::'.length]) {
+            state = 'start';
+            startLine = i;
+            startChar = j;
+            pos += 'descendant::'.length;
           }
-          eat();
+          else {
+            eat();
+          }
           break;
         case 'comment':
           if (peak() === ':') {
@@ -305,13 +318,6 @@ export class CodemirrorComponent implements OnInit, OnChanges {
             } else {
               reset();
             }
-          } else if (this._expression[pos] === 'n') {
-            if (this._expression.substring(pos).startsWith('n:')) {
-              pos += 'n:f'.length;
-              continue;
-            } else {
-              reset();
-            }
           } else if (this._expression[pos] === ')') {
             eatExpr();
             continue;
@@ -321,6 +327,7 @@ export class CodemirrorComponent implements OnInit, OnChanges {
             }
           } else {
             reset();
+            continue;
           }
           eat();
           break;
@@ -328,8 +335,7 @@ export class CodemirrorComponent implements OnInit, OnChanges {
     }
 
     if (state === 'done') {
-        this.currentStatement = this.instance.getDoc().markText({line: startLine, ch: startChar}, {line: endLine, ch: endChar + 1}, {className: "current-statement"});
-        // this.instance.getDoc().setSelection({line: startLine, ch: startChar}, {line: endLine, ch: endChar + 1});
+        this.currentStatement = this.instance.getDoc().markText({line: startLine, ch: startChar}, {line: endLine, ch: endChar + 1}, {className: 'current-statement'});
     }
   }
 

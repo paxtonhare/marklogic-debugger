@@ -106,6 +106,9 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.showWelcome();
         }
 
+      },
+      () => {
+        this.router.navigate(['login']);
       });
     });
   }
@@ -229,6 +232,12 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.handleDebugError(error)
     });
     this.isServerEnabled();
+  }
+
+  continueRequest(requestId) {
+    this.marklogic.continue(requestId).subscribe(() => {
+      this.getAttached();
+    });
   }
 
   setBreakpoints() {
