@@ -166,6 +166,13 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
   .debugger {
     position: relative;
 
+    .section-body {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      overflow-y: scroll;
+    }
+
     .disabled {
       position: absolute;
       top: 0px;
@@ -227,9 +234,11 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
 
 ul.frames {
   list-style: none;
-  padding: 0px 10px;
+  padding: 0px;
+  margin: 0px;
 
   li {
+    padding: 5px;
     cursor: default;
     &:hover {
       background-color: $hover-color;
@@ -319,7 +328,5 @@ ul.frames {
 }
 
 .console-buttons {
-  position: absolute;
-  top: 30px;
-  right: 10px;
+  float: right;
 }

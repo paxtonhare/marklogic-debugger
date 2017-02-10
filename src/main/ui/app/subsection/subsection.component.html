@@ -1,6 +1,7 @@
-<div class="sub-section">
-  <div class="title" (click)="toggleCollapsed()" [ngClass]="{'collapsed' : isCollapsed()}"><mdl-icon>arrow_drop_down</mdl-icon> {{title}}</div>
-  <div class="body" *ngIf="!isCollapsed()">
-    <ng-content></ng-content>
-  </div>
+<div class="title" (click)="toggleCollapsed()" [ngClass]="{'collapsed' : isCollapsed()}">
+  <mdl-icon>arrow_drop_down</mdl-icon> {{title}}
+  <ng-content select="[section-header]"></ng-content>
+</div>
+<div class="body" *ngIf="!isCollapsed()">
+  <ng-content></ng-content>
 </div>
