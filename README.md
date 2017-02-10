@@ -20,9 +20,9 @@ Want to use a port other than 9999? Run it like this:
 
 `java -jar marklogic-debugger.war --server.port=8090`
 
-### Known Issues
+### Browser Compatibility
 
-Doesn't play well with Safari. Use Chrome or FireFox. Not tested in IE.
+Use Chrome or FireFox or Safari. Not tested in IE.
 
 ## Building From Source
 
