@@ -1,7 +1,16 @@
 # Change Log
 
-## [Unreleased](https://github.com/paxtonhare/marklogic-debugger/tree/v1.0.0-alpha.4)
+## [v1.0.0-alpha.5](https://github.com/paxtonhare/marklogic-debugger/tree/v1.0.0-alpha.5)
 
+[Full Changelog](https://github.com/paxtonhare/marklogic-debugger/compare/v1.0.0-alpha.4...v1.0.0-alpha.5)
+
+**Closed issues:**
+
+- Add scroll bar to the Console area [\#15](https://github.com/paxtonhare/marklogic-debugger/issues/15)
+- debug area changes height when stepping [\#14](https://github.com/paxtonhare/marklogic-debugger/issues/14)
+- Welcome dialog is showing many times [\#13](https://github.com/paxtonhare/marklogic-debugger/issues/13)
+
+## [v1.0.0-alpha.4](https://github.com/paxtonhare/marklogic-debugger/tree/v1.0.0-alpha.4) (2017-02-10)
 [Full Changelog](https://github.com/paxtonhare/marklogic-debugger/compare/v1.0.0-alpha.3...v1.0.0-alpha.4)
 
 **Closed issues:**
