@@ -69,7 +69,7 @@
     $value : #{($i * 5) / 100};
 
     /deep/ .#{$flexName}-#{$i * 5} {
-      flex-grow: #{$value};
+      flex: #{$value} 1 0%
     }
   }
 }

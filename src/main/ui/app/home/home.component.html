@@ -16,7 +16,7 @@
   </mdl-layout-header>
   <mdl-layout-content>
     <div gm-grid>
-      <div gm-row class="flex flex-80">
+      <div gm-row class="flex flex-70">
         <div gm-col class="flex flex-30 files">
           <template [ngIf]="selectedServer">
             <div class="section-title">
@@ -37,7 +37,7 @@
         <gm-divider></gm-divider>
         <div gm-col class="flex flex-70">
           <div class="fill-height" *ngIf="currentUri">
-            <div class="section-title">File View: {{currentUri}} <span>{{currentExpression}}</span></div>
+            <div class="section-title">File View: {{currentUri}}</div>
             <div class="section-body">
               <app-codemirror *ngIf="fileText"
                 [ngModel]="fileText"
@@ -53,7 +53,7 @@
       <div gm-divider class="debug-divider">
         <span>Debug Area</span>
       </div>
-      <div gm-row class="flex flex-20 debug-area">
+      <div gm-row class="flex flex-30 debug-area">
         <div gm-col class="flex flex-30 debugger">
           <div class="disabled" *ngIf="!requestId">
             <span>DEBUG A REQUEST TO ENABLE</span>
@@ -84,7 +84,7 @@
               <p *ngIf="!hasVariables()">&nbsp;</p>
             </app-subsection>
             <app-subsection [title]="'Console'">
-              <div class="console-buttons">
+              <div class="console-buttons" section-header>
                 <button md-button (click)="clearConsole()">Clear</button>
               </div>
               <div *ngFor="let output of consoleOutput" class="console-output">
