@@ -37,7 +37,7 @@
         <gm-divider></gm-divider>
         <div gm-col class="flex flex-70">
           <div class="fill-height" *ngIf="currentUri">
-            <div class="section-title">File View: {{currentUri}} <span>{{currentExpression}}</span></div>
+            <div class="section-title">File View: {{currentUri}}</div>
             <div class="section-body">
               <app-codemirror *ngIf="fileText"
                 [ngModel]="fileText"

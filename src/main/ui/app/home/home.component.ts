@@ -39,6 +39,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   consoleOutput: Array<any> = [];
   commandHistory: Array<string> = [];
   commandHistoryIndex: number = -1;
+  welcomeShown: boolean = false;
 
   breakpointsSet: boolean = false;
 
@@ -102,8 +103,9 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.currentUri = null;
         }
 
-        if (localStorage.getItem('_show_welcome_') !== 'false') {
+        if (!this.welcomeShown && localStorage.getItem('_show_welcome_') !== 'false') {
           this.showWelcome();
+          this.welcomeShown = true;
         }
 
       },
