@@ -2,6 +2,11 @@
 
 $bg-color: unquote("rgb(#{$palette-debugger-50})");
 
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
 :not(.filetree) > .filetree {
   margin: 0px 0px 0px 5px;
 }

@@ -61,26 +61,28 @@ declare function local:build-dirs($uris as xs:string*, $parent as xs:string)
   return $a
 };
 
-declare function local:get-system-files($dir as xs:string, $a as json:array) {
-  for $entry in xdmp:filesystem-directory($dir)/dir:entry[dir:type = "file"]
+declare function local:get-system-files($root-dir, $dirs, $a as json:array) {
+  for $entry in $dirs/dir:entry[dir:type = "file"]
   let $o := json:object()
   let $_ := map:put($o, "name", fn:string($entry/dir:filename))
   let $_ := map:put($o, "type", "file")
   let $_ := map:put($o, "collapsed", fn:true())
-  let $_ := map:put($o, "uri", fn:replace($entry/dir:pathname, $ml-dir, ""))
+  let $_ := map:put($o, "uri", fn:replace($entry/dir:pathname, $root-dir, ""))
   return
     json:array-push($a, $o)
 };
 
-declare function local:get-system-dirs($dir as xs:string, $a as json:array) {
-  for $entry in xdmp:filesystem-directory($dir)/dir:entry[dir:type = "directory"]
+declare function local:get-system-dirs($root-dir, $dirs, $a as json:array) {
+  for $entry in $dirs/dir:entry[dir:type = "directory"]
   return
     let $o := json:object()
     let $children :=  json:array()
-    let $_ := local:get-system-dirs($entry/dir:pathname, $children)
-    let $_ := local:get-system-files($dir, $children)
+    let $child-dirs := xdmp:filesystem-directory($entry/dir:pathname)
+    let $_ := local:get-system-dirs($root-dir, $child-dirs, $children)
+    let $_ := local:get-system-files($root-dir, $child-dirs, $children)
     let $_ := map:put($o, "name", fn:string($entry/dir:filename))
     let $_ := map:put($o, "type", "dir")
+    let $_ := map:put($o, "collapsed", fn:true())
     let $_ := map:put($o, "children", $children)
     return
       json:array-push($a, $o)
@@ -95,8 +97,10 @@ let $obj :=
     let $o := json:object()
     let $_ := map:put($o, "name", "/")
     let $_ := map:put($o, "type", "dir")
+    let $_ := map:put($o, "collapsed", fn:false())
     let $children := json:array()
-    let $_ := local:get-system-dirs($server-root, $children)
+    let $dirs := xdmp:filesystem-directory($server-root)
+    let $_ := local:get-system-dirs($server-root, $dirs, $children)
     let $_ := map:put($o, "children", $children)
     return
       $o
@@ -118,6 +122,7 @@ let $obj :=
     let $o := json:object()
     let $_ := map:put($o, "name", "/")
     let $_ := map:put($o, "type", "dir")
+    let $_ := map:put($o, "collapsed", fn:false())
     let $children := local:build-dirs($uris, "/")
     let $_ := map:put($o, "children", $children)
     return

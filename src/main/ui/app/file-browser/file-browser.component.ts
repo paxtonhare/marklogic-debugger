@@ -8,7 +8,7 @@ import { Component, ElementRef, Input, Output, EventEmitter } from '@angular/cor
 export class FileBrowserComponent {
   @Input() selectedUri: string;
   @Input() currentChild: any;
-  @Input() files: Array<any>;
+  @Input() fileSets: Array<any>;
   @Output() fileShown = new EventEmitter();
   @Input() isRoot: boolean = true;
 

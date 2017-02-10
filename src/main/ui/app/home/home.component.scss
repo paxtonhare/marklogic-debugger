@@ -11,8 +11,9 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
 }
 
 .fill-height {
-  height: 100%;
-  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 }
 
 /deep/ .breakpoints {
@@ -95,6 +96,11 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
       .request-id {
         font-size: 60%;
       }
+
+      .clickable {
+        top: 6px;
+        position: relative;
+      }
     }
   }
 
@@ -109,10 +115,6 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
   overflow: hidden;
 }
 
-[gm-col] {
-  overflow-y: auto;
-}
-
 .section-title {
   background-color: #f3f3f3;
   color: #333;
@@ -120,16 +122,18 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
   border-bottom: 1px solid #ccc;
 }
 
+/deep/ app-file-browser {
+  flex: 1 auto;
+}
+
 .files {
   min-width: 250px;
 
   .section-body {
-    position: absolute;
-    top: 41px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
-    overflow: auto;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    overflow-y: scroll;
   }
 
   .debug-status {
@@ -252,20 +256,15 @@ ul.frames {
 
 .flex-70 {
   .section-body {
-    top: 41px;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    position: absolute;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    overflow-y: scroll;
   }
 
   app-codemirror {
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    display: flex;
+    flex: 1;
   }
 }
 

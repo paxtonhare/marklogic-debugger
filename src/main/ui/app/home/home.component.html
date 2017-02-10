@@ -16,9 +16,9 @@
   </mdl-layout-header>
   <mdl-layout-content>
     <div gm-grid>
-      <div gm-row class="flex-80">
-        <div gm-col class="flex-30 files">
-          <div *ngIf="selectedServer"class="fill-height">
+      <div gm-row class="flex flex-80">
+        <div gm-col class="flex flex-30 files">
+          <template [ngIf]="selectedServer">
             <div class="section-title">
               <span><strong>{{selectedServer.name}}</strong> Files</span>
               <div class="debug-status">
@@ -28,20 +28,16 @@
             </div>
             <div class="section-body">
               <app-file-browser
-                [files]="serverFiles"
-                [selectedUri]="currentUri"
-                (fileShown)="fileClicked($event.uri)"></app-file-browser>
-              <app-file-browser
-                [files]="systemFiles"
+                [fileSets]="[serverFiles, systemFiles]"
                 [selectedUri]="currentUri"
                 (fileShown)="fileClicked($event.uri)"></app-file-browser>
             </div>
-          </div>
+          </template>
         </div>
         <gm-divider></gm-divider>
-        <div gm-col class="flex-70">
+        <div gm-col class="flex flex-70">
           <div class="fill-height" *ngIf="currentUri">
-            <div class="section-title">File View: {{currentUri}}</div>
+            <div class="section-title">File View: {{currentUri}} <span>{{currentExpression}}</span></div>
             <div class="section-body">
               <app-codemirror *ngIf="fileText"
                 [ngModel]="fileText"
@@ -57,8 +53,8 @@
       <div gm-divider class="debug-divider">
         <span>Debug Area</span>
       </div>
-      <div gm-row class="flex-20 debug-area">
-        <div gm-col class="flex-30 debugger">
+      <div gm-row class="flex flex-20 debug-area">
+        <div gm-col class="flex flex-30 debugger">
           <div class="disabled" *ngIf="!requestId">
             <span>DEBUG A REQUEST TO ENABLE</span>
           </div>
@@ -102,7 +98,7 @@
           </div>
         </div>
         <div gm-divider></div>
-        <div gm-col class="flex-35 breakpoints">
+        <div gm-col class="flex flex-35 breakpoints">
           <div class="section-title">BreakPoints</div>
           <div class="section-body">
             <p *ngIf="!breakpointUris || breakpointUris.length === 0">No breakpoints</p>
@@ -118,7 +114,7 @@
           </div>
         </div>
         <div gm-divider></div>
-        <div gm-col class="flex-35 attached">
+        <div gm-col class="flex flex-35 attached">
           <div class="section-title">Requests <span class="clickable" (click)="getAttached()"><i class="fa fa-repeat"></i></span></div>
           <div class="section-body">
             <p *ngIf="!attached || attached.length === 0">No Requests stopped</p>
@@ -126,6 +122,7 @@
               <li *ngFor="let attachment of attached" (click)="debugRequest(attachment.requestId)">
                 <i class="fa fa-long-arrow-right" *ngIf="requestId === attachment.requestId"></i>
                 {{attachment.requestRewrittenText || attachment.requestText}} <span class="request-id">({{attachment.requestId}})</span>
+                <span class="clickable" title="continue" (click)="continueRequest(attachment.requestId)"><mdl-icon>play_arrow</mdl-icon></span>
               </li>
             </ul>
           </div>
