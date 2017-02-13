@@ -2,21 +2,43 @@
   <div class="mdl-dialog__content">
     <h4>Welcome to the MarkLogic Debugger!</h4>
     <div>
-      <p>To get started turn on debugging above. <mdl-switch class="debug-instructions" [ngModel]="true" disabled></mdl-switch>
-      </p>
-      <p>The next time you run your code MarkLogic will stop automatically
-      at the first instruction.</p>
-      <p>Press the refresh arrow <i class="fa fa-repeat"></i> in the Requests pane to show all
-      of the waiting requests. Simply click on one to start debugging.
-      </p>
-      <p>Don't forget to turn off debugging when you are finished!</p>
-      <p>This help is available from the top right menu. Simply click on the <button class="help-button" mdl-button mdl-button-type="icon" disabled mdl-ripple><mdl-icon>more_vert</mdl-icon></button> button.
+      <p>There are 3 ways to debug your requests. (scroll to see them all)</p>
+
+      <h5>1. Auto-pause requests</h5>
+      <div class="instructions">
+        <p>With this option you tell MarkLogic to automatically pause subsequent requests on
+        the first instruction.</p>
+        <p>Enable this method by turning on Auto-pause in the requests pane <mdl-switch class="debug-instructions" [ngModel]="true" disabled></mdl-switch></p>
+        <p>Once enabled you can refresh the request list by clicking on the refresh button: <i class="fa fa-repeat"></i>.</p>
+        <p>Then click on the request you wish to debug.</p>
+      </div>
+
+      <h5>2. dbg:stop()</h5>
+      <div class="instructions">
+        <p>This method is when you put a call to db:stop() somewhere in your code.</p>
+        <p>This will force MarkLogic to stop execution of your code on the db:stop() statement.</p>
+        <p>Once you run your code you will need to refresh the request list by clicking on the refresh button: <i class="fa fa-repeat"></i>.</p>
+        <p>Then click on the request you wish to debug.</p>
+      </div>
+
+      <h5>3. Pause a long running request</h5>
+      <div class="instructions">
+        <p>This method is when you tell MarkLogic to pause a long running request so you can debug it.</p>
+        <p>Refresh the request list by clicking on the refresh button: <i class="fa fa-repeat"></i>.</p>
+        <p>Then click on the pause button next to the request you wish to debug.</p>
+      </div>
     </div>
   </div>
   <div class="mdl-dialog__actions">
-    <mdl-checkbox [(ngModel)]="showOnStartup">
-      Show this message on Startup
-    </mdl-checkbox>
-    <button mdl-button (click)="cancel()" mdl-button-type="raised" mdl-colored="primary" mdl-ripple>Ok</button>
+    <div class="show-on-startup">
+      <mdl-checkbox [(ngModel)]="showOnStartup">
+        Show this message on Startup
+      </mdl-checkbox>
+      <span>This help is available from the top right menu. Simply click on the <button class="help-button" mdl-button mdl-button-type="icon" disabled mdl-ripple><mdl-icon>more_vert</mdl-icon></button> button.</span>
+    </div>
+
+    <div>
+      <button mdl-button (click)="cancel()" mdl-button-type="raised" mdl-colored="primary" mdl-ripple>Ok</button>
+    </div>
   </div>
 </div>

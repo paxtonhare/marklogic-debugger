@@ -11,6 +11,15 @@
   width: 500px;
 }
 
+.mdl-dialog__content {
+  max-height: 400px;
+  overflow-y: scroll;
+}
+
+.mdl-dialog__actions {
+  border-top: 1px solid #d9d9d9;
+}
+
 /deep/ mdl-switch.mdl-switch.debug-instructions {
   display: inline;
   top: -5px;
@@ -44,4 +53,16 @@ pre {
   background-color: #222;
 
   color: white;
+}
+
+.instructions {
+  margin: 0px 20px;
+}
+
+.show-on-startup {
+  // float: left;
+  height: auto;
+  span {
+    color: rgba(0,0,0, 0.54);
+  }
 }

@@ -79,7 +79,18 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
   }
 }
 
-.attached {
+.requests {
+  .debug-status {
+    display: inline;
+    float: right;
+
+    mdl-switch.mdl-switch.is-upgraded {
+      padding-left: 28px;
+      display: inline;
+      margin-right: 20px;
+      top: -5px;
+    }
+  }
   ul {
     margin: 0;
     padding: 0px;
@@ -135,19 +146,6 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
     flex-direction: column;
     overflow-y: scroll;
   }
-
-  .debug-status {
-    display: inline;
-    float: right;
-
-    mdl-switch.mdl-switch.is-upgraded {
-      padding-left: 28px;
-      display: inline;
-      margin-right: 20px;
-      top: -5px;
-    }
-  }
-
 }
 
 

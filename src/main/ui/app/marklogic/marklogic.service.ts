@@ -43,8 +43,8 @@ export class MarkLogicService {
     return this.get(`/api/servers/${serverId}`);
   }
 
-  getAttached(serverId) {
-    return this.get(`/api/servers/${serverId}/attached`);
+  getRequests(serverId) {
+    return this.get(`/api/servers/${serverId}/requests`);
   }
 
   getStack(requestId) {
@@ -65,6 +65,10 @@ export class MarkLogicService {
 
   continue(requestId: any) {
     return this.http.get(`/api/requests/${requestId}/continue`);
+  }
+
+  pause(requestId: any) {
+    return this.http.get(`/api/requests/${requestId}/pause`);
   }
 
   get(url: string) {

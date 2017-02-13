@@ -15,10 +15,8 @@ import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.types.ValueType;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -150,13 +148,13 @@ public class ApiController {
 				return evalQuery(auth, "get-file.xqy", hm);
 		}
 
-		@RequestMapping(value = "/servers/{serverId}/attached", method = RequestMethod.GET)
+		@RequestMapping(value = "/servers/{serverId}/requests", method = RequestMethod.GET)
 		@ResponseBody
-		public String getAttached(@PathVariable String serverId) throws InvalidRequestException {
+		public String getRequests(@PathVariable String serverId) throws InvalidRequestException {
 			ConnectionAuthenticationToken auth = (ConnectionAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
 			HashMap<String, String> hm = new HashMap<>();
 			hm.put("serverId", serverId);
-			return evalQuery(auth, "get-attached.xqy", hm);
+			return evalQuery(auth, "get-requests.xqy", hm);
 		}
 
 	@RequestMapping(value = "/requests/{requestId}/stack", method = RequestMethod.GET)
@@ -202,6 +200,15 @@ public class ApiController {
 		HashMap<String, String> hm = new HashMap<>();
 		hm.put("requestId", requestId);
 		return evalQuery(auth, "continue.xqy", hm);
+	}
+
+	@RequestMapping(value = "/requests/{requestId}/pause", method = RequestMethod.GET)
+	@ResponseBody
+	public String pauseRequest(@PathVariable String requestId) throws InvalidRequestException {
+		ConnectionAuthenticationToken auth = (ConnectionAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
+		HashMap<String, String> hm = new HashMap<>();
+		hm.put("requestId", requestId);
+		return evalQuery(auth, "pause.xqy", hm);
 	}
 
 	@RequestMapping(value = "/requests/{requestId}/breakpoints", method = RequestMethod.POST)

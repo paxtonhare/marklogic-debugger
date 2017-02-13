@@ -23,7 +23,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   port: number;
   serverFiles: any;
   systemFiles: any;
-  attached: any;
+  requests: any;
   currentUri: string;
   currentLine: number;
   showLine: number;
@@ -89,7 +89,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           if (server) {
             this.selectedServer = server;
             this.showFiles();
-            this.getAttached();
+            this.getRequests();
             this.getBreakpoints();
           }
         }
@@ -146,11 +146,14 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  getAttached() {
-    this.marklogic.getAttached(this.selectedServer.id).subscribe((attached: any) => {
-      this.attached = attached;
+  getRequests() {
+    this.marklogic.getRequests(this.selectedServer.id).subscribe((requests: any) => {
+      this.requests = requests;
+      if (this.requests === null || this.requests.length === 0) {
+        this.router.navigate(['server', this.appserverName]);
+      }
     },() => {
-      this.attached = null;
+      this.requests = null;
     });
   }
 
@@ -197,7 +200,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     (error) => {
       this.handleDebugError(error)
     });
-    this.isServerEnabled();
   }
 
   stepIn() {
@@ -209,7 +211,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     (error) => {
       this.handleDebugError(error)
     });
-    this.isServerEnabled();
   }
 
   stepOut() {
@@ -221,7 +222,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     (error) => {
       this.handleDebugError(error)
     });
-    this.isServerEnabled();
   }
 
   continue() {
@@ -233,12 +233,17 @@ export class HomeComponent implements OnInit, OnDestroy {
     (error) => {
       this.handleDebugError(error)
     });
-    this.isServerEnabled();
   }
 
   continueRequest(requestId) {
     this.marklogic.continue(requestId).subscribe(() => {
-      this.getAttached();
+      this.getRequests();
+    });
+  }
+
+  pauseRequest(requestId) {
+    this.marklogic.pause(requestId).subscribe(() => {
+      this.debugRequest(requestId);
     });
   }
 
@@ -309,17 +314,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   disableServer(server) {
     this.marklogic.disableServer(server.id).subscribe(() => {
       server.connected = false;
-    });
-  }
-
-  isServerEnabled() {
-    this.marklogic.getServerEnabled(this.selectedServer.id).subscribe((resp) => {
-      if (!resp.enabled) {
-        let res = this.dialogService.alert(`Debugging is no longer enabled. Try again.`);
-        res.subscribe(() => {
-          this.router.navigate(['server', this.appserverName]);
-        });
-      }
     });
   }
 
