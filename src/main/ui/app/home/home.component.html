@@ -21,10 +21,6 @@
           <template [ngIf]="selectedServer">
             <div class="section-title">
               <span><strong>{{selectedServer.name}}</strong> Files</span>
-              <div class="debug-status">
-                <mdl-switch *ngIf="selectedServer" [(ngModel)]="selectedServer.connected" (change)="toggleConnected(selectedServer)" mdl-ripple></mdl-switch>
-                <span class="debug-status" *ngIf="selectedServer"> Debugging is <strong>{{selectedServer.connected ? 'ON' : 'OFF'}}</strong></span>
-              </div>
             </div>
             <div class="section-body">
               <app-file-browser
@@ -37,7 +33,10 @@
         <gm-divider></gm-divider>
         <div gm-col class="flex flex-70">
           <div class="fill-height" *ngIf="currentUri">
-            <div class="section-title">File View: {{currentUri}}</div>
+            <div class="section-title">
+              <span>File View: {{currentUri}}</span>
+              <span title="Debug this file on the server" class="invoke-module clickable" (click)="invokeModule(currentUri)"><mdl-icon>play_arrow</mdl-icon></span>
+            </div>
             <div class="section-body">
               <app-codemirror *ngIf="fileText"
                 [ngModel]="fileText"
@@ -104,7 +103,7 @@
             <p *ngIf="!breakpointUris || breakpointUris.length === 0">No breakpoints</p>
             <div *ngFor="let uri of breakpointUris">
               <ul>
-                <li *ngFor="let breakpoint of breakpoints[uri]">
+                <li *ngFor="let breakpoint of breakpoints.get(uri)">
                   <span class="breakpoint-symbol" (click)="toggleBreakpoint(breakpoint)" [ngClass]="{ 'enabled' : breakpoint.enabled }">&#x25C9;</span>
                   <span (click)="gotoBreakpoint(breakpoint.uri, breakpoint.line)">{{breakpoint.uri}}:{{breakpoint.line + 1}}</span>
                   <i class="fa fa-times" (click)="disableBreakpoint(breakpoint)"></i>
@@ -114,15 +113,22 @@
           </div>
         </div>
         <div gm-divider></div>
-        <div gm-col class="flex flex-35 attached">
-          <div class="section-title">Requests <span class="clickable" (click)="getAttached()"><i class="fa fa-repeat"></i></span></div>
+        <div gm-col class="flex flex-35 requests">
+          <div class="section-title">
+            Requests <span class="clickable" (click)="getRequests()"><i class="fa fa-repeat"></i></span>
+            <div class="debug-status">
+              <mdl-switch *ngIf="selectedServer" [(ngModel)]="selectedServer.connected" (change)="toggleConnected(selectedServer)" mdl-ripple></mdl-switch>
+              <span class="debug-status" *ngIf="selectedServer"> Auto-pause requests is <strong>{{selectedServer.connected ? 'ON' : 'OFF'}}</strong></span>
+            </div>
+          </div>
           <div class="section-body">
-            <p *ngIf="!attached || attached.length === 0">No Requests stopped</p>
-            <ul *ngIf="attached && attached.length > 0">
-              <li *ngFor="let attachment of attached" (click)="debugRequest(attachment.requestId)">
-                <i class="fa fa-long-arrow-right" *ngIf="requestId === attachment.requestId"></i>
-                {{attachment.requestRewrittenText || attachment.requestText}} <span class="request-id">({{attachment.requestId}})</span>
-                <span class="clickable" title="continue" (click)="continueRequest(attachment.requestId)"><mdl-icon>play_arrow</mdl-icon></span>
+            <p *ngIf="!requests || requests.length === 0">No Requests stopped</p>
+            <ul *ngIf="requests && requests.length > 0">
+              <li *ngFor="let request of requests" (click)="debugRequest(request.requestId)">
+                <i class="fa fa-long-arrow-right" *ngIf="requestId === request.requestId"></i>
+                {{request.requestRewrittenText || request.requestText}} <span class="request-id">({{request.requestId}})</span>
+                <span *ngIf="request.debuggingStatus === 'attached'" class="clickable" title="continue" (click)="continueRequest(request.requestId)"><mdl-icon>play_arrow</mdl-icon></span>
+                <span *ngIf="request.debuggingStatus !== 'attached'" class="clickable" title="pause" (click)="pauseRequest(request.requestId)"><mdl-icon>pause</mdl-icon></span>
               </li>
             </ul>
           </div>

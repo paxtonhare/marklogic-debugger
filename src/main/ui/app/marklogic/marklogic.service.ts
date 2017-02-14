@@ -43,8 +43,8 @@ export class MarkLogicService {
     return this.get(`/api/servers/${serverId}`);
   }
 
-  getAttached(serverId) {
-    return this.get(`/api/servers/${serverId}/attached`);
+  getRequests(serverId) {
+    return this.get(`/api/servers/${serverId}/requests`);
   }
 
   getStack(requestId) {
@@ -67,6 +67,10 @@ export class MarkLogicService {
     return this.http.get(`/api/requests/${requestId}/continue`);
   }
 
+  pause(requestId: any) {
+    return this.http.get(`/api/requests/${requestId}/pause`);
+  }
+
   get(url: string) {
     return this.http.get(url).map((resp: Response) => {
       return resp.json();
@@ -82,12 +86,24 @@ export class MarkLogicService {
   }
 
   getAllBreakpoints(server: string): Map<string, Array<Breakpoint>> {
-    return JSON.parse(localStorage.getItem(`breakpoints-${server}`)) || new Map<string, Array<Breakpoint>>();
+    let map = new Map<string, Array<Breakpoint>>();
+    let parsed = JSON.parse(localStorage.getItem(`breakpoints-${server}`));
+    if (parsed) {
+      Object.keys(parsed).forEach((key) => {
+        let breakpoints = new Array<Breakpoint>();
+        for (let bp of parsed[key]) {
+          let breakpoint = new Breakpoint(bp.uri, bp.line, bp.enabled);
+          breakpoints.push(breakpoint);
+        }
+        map.set(key, breakpoints);
+      });
+    }
+    return map;
   }
 
   getBreakpoints(server: string, uri: string): Array<Breakpoint> {
     let breakpoints = this.getAllBreakpoints(server);
-    return breakpoints[uri] || new Array<Breakpoint>();
+    return breakpoints.get(uri) || new Array<Breakpoint>();
   }
 
   enableBreakpoint(server: string, uri: string, line: number) {
@@ -134,20 +150,28 @@ export class MarkLogicService {
     });
   }
 
+  invokeModule(serverId: string, uri: string) {
+    return this.http.post(`/api/servers/${serverId}/invoke?uri=${uri}`, null);
+  }
+
   private setBreakpoints(server: string, uri, breakpoints: Array<Breakpoint>) {
     let allBreakpoints = this.getAllBreakpoints(server);
-    allBreakpoints[uri] = breakpoints;
+    allBreakpoints.set(uri, breakpoints);
     this.saveBreakpoints(server, allBreakpoints);
   }
 
   private removeBreakpoints(server: string, uri) {
     let allBreakpoints = this.getAllBreakpoints(server);
-    delete allBreakpoints[uri];
+    allBreakpoints.delete(uri);
     this.saveBreakpoints(server, allBreakpoints);
   }
 
 
   private saveBreakpoints(server: string, breakpoints: Map<string, Array<Breakpoint>>) {
-    localStorage.setItem(`breakpoints-${server}`, JSON.stringify(breakpoints));
+    let serializeme = {};
+    breakpoints.forEach((value, key) => {
+      serializeme[key] = value;
+    });
+    localStorage.setItem(`breakpoints-${server}`, JSON.stringify(serializeme));
   }
 }

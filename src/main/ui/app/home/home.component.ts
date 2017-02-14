@@ -23,7 +23,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   port: number;
   serverFiles: any;
   systemFiles: any;
-  attached: any;
+  requests: any;
   currentUri: string;
   currentLine: number;
   showLine: number;
@@ -89,7 +89,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           if (server) {
             this.selectedServer = server;
             this.showFiles();
-            this.getAttached();
+            this.getRequests();
             this.getBreakpoints();
           }
         }
@@ -146,11 +146,14 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  getAttached() {
-    this.marklogic.getAttached(this.selectedServer.id).subscribe((attached: any) => {
-      this.attached = attached;
+  getRequests() {
+    this.marklogic.getRequests(this.selectedServer.id).subscribe((requests: any) => {
+      this.requests = requests;
+      if (this.requests === null || this.requests.length === 0) {
+        this.router.navigate(['server', this.appserverName]);
+      }
     },() => {
-      this.attached = null;
+      this.requests = null;
     });
   }
 
@@ -197,7 +200,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     (error) => {
       this.handleDebugError(error)
     });
-    this.isServerEnabled();
   }
 
   stepIn() {
@@ -209,7 +211,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     (error) => {
       this.handleDebugError(error)
     });
-    this.isServerEnabled();
   }
 
   stepOut() {
@@ -221,7 +222,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     (error) => {
       this.handleDebugError(error)
     });
-    this.isServerEnabled();
   }
 
   continue() {
@@ -233,22 +233,31 @@ export class HomeComponent implements OnInit, OnDestroy {
     (error) => {
       this.handleDebugError(error)
     });
-    this.isServerEnabled();
   }
 
   continueRequest(requestId) {
     this.marklogic.continue(requestId).subscribe(() => {
-      this.getAttached();
+      this.getRequests();
+    });
+  }
+
+  pauseRequest(requestId) {
+    this.marklogic.pause(requestId).subscribe(() => {
+      this.debugRequest(requestId);
     });
   }
 
   setBreakpoints() {
-    if (!this.breakpointsSet && Object.keys(this.breakpoints).length > 0) {
+    let keys: Array<string>;
+    if (this.breakpoints) {
+      keys = Array.from(this.breakpoints.keys());
+    }
+
+    if (!this.breakpointsSet && keys && keys.length > 0) {
       this.breakpointsSet = true;
       let breakpoints = new Array<Breakpoint>();
-      let keys = Object.keys(this.breakpoints);
       for (let key of keys) {
-        for (let bps of this.breakpoints[key]) {
+        for (let bps of this.breakpoints.get(key)) {
           breakpoints.push(bps);
         }
       }
@@ -264,8 +273,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   gutterClick(cm: any, line: number, gutter: string, clickEvent: MouseEvent) {
-    console.log(clickEvent);
     const info = cm.lineInfo(line);
+    this.breakpointsSet = false;
     if (info.gutterMarkers && info.gutterMarkers.breakpoints && clickEvent.which === 3) {
       this.marklogic.disableBreakpoint(this.selectedServer.name, this.currentUri, line);
     } else if (info.gutterMarkers && info.gutterMarkers.breakpoints) {
@@ -278,7 +287,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   getBreakpoints() {
     this.breakpoints = this.marklogic.getAllBreakpoints(this.selectedServer.name);
-    this.breakpointUris = Object.keys(this.breakpoints);
+    this.breakpointUris = Array.from(this.breakpoints.keys());
     if (this.currentUri) {
       this.fileBreakpoints = this.marklogic.getBreakpoints(this.selectedServer.name, this.currentUri);
     } else {
@@ -287,11 +296,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   toggleBreakpoint(breakpoint: Breakpoint) {
+    this.breakpointsSet = false;
     this.marklogic.toggleBreakpoint(this.selectedServer.name, breakpoint.uri, breakpoint.line);
     this.getBreakpoints();
   }
 
   disableBreakpoint(breakpoint: Breakpoint) {
+    this.breakpointsSet = false;
     this.marklogic.disableBreakpoint(this.selectedServer.name, breakpoint.uri, breakpoint.line);
     this.getBreakpoints();
   }
@@ -309,17 +320,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   disableServer(server) {
     this.marklogic.disableServer(server.id).subscribe(() => {
       server.connected = false;
-    });
-  }
-
-  isServerEnabled() {
-    this.marklogic.getServerEnabled(this.selectedServer.id).subscribe((resp) => {
-      if (!resp.enabled) {
-        let res = this.dialogService.alert(`Debugging is no longer enabled. Try again.`);
-        res.subscribe(() => {
-          this.router.navigate(['server', this.appserverName]);
-        });
-      }
     });
   }
 
@@ -406,6 +406,14 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.consoleInput = this.commandHistory[this.commandHistory.length - 1 - this.commandHistoryIndex];
       }
     }
+  }
+
+  invokeModule(uri: string) {
+    this.marklogic.invokeModule(this.selectedServer.id, uri).subscribe(() => {
+      setTimeout(() => {
+        this.getRequests();
+      }, 1000);
+    });
   }
 
   showError(errorText: string) {

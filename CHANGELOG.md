@@ -1,7 +1,19 @@
 # Change Log
 
-## [v1.0.0-alpha.5](https://github.com/paxtonhare/marklogic-debugger/tree/v1.0.0-alpha.5)
+## [v1.0.0-alpha.6](https://github.com/paxtonhare/marklogic-debugger/tree/v1.0.0-alpha.6)
 
+[Full Changelog](https://github.com/paxtonhare/marklogic-debugger/compare/v1.0.0-alpha.5...v1.0.0-alpha.6)
+
+**Closed issues:**
+
+- invoke a main module from the debugger [\#19](https://github.com/paxtonhare/marklogic-debugger/issues/19)
+- determine if breakpoint is valid when set [\#18](https://github.com/paxtonhare/marklogic-debugger/issues/18)
+- update node dependencies [\#17](https://github.com/paxtonhare/marklogic-debugger/issues/17)
+- Rename the "Debugging is ON|OFF" [\#16](https://github.com/paxtonhare/marklogic-debugger/issues/16)
+- Can we pause a long running request? [\#10](https://github.com/paxtonhare/marklogic-debugger/issues/10)
+- Indicate that something happened [\#3](https://github.com/paxtonhare/marklogic-debugger/issues/3)
+
+## [v1.0.0-alpha.5](https://github.com/paxtonhare/marklogic-debugger/tree/v1.0.0-alpha.5) (2017-02-10)
 [Full Changelog](https://github.com/paxtonhare/marklogic-debugger/compare/v1.0.0-alpha.4...v1.0.0-alpha.5)
 
 **Closed issues:**

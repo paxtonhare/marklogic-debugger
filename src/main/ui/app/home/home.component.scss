@@ -10,6 +10,29 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
   }
 }
 
+.clickable {
+  color: #666;
+  width: 20px;
+  height: 20px;
+  margin: auto;
+  display: inline-block;
+  border-radius: 2px;
+  cursor: default;
+
+  /deep/ mdl-icon {
+    font-size: 20px;
+  }
+  &:hover {
+    background-color: rgba(0,0,0,0.05);
+    color: black;
+  }
+}
+
+.invoke-module {
+  top: 6px;
+  position: relative;
+}
+
 .fill-height {
   display: flex;
   flex: 1;
@@ -21,6 +44,7 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
 
   .section-body {
     padding: 10px;
+    overflow-y: scroll;
   }
 }
 
@@ -79,7 +103,18 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
   }
 }
 
-.attached {
+.requests {
+  .debug-status {
+    display: inline;
+    float: right;
+
+    mdl-switch.mdl-switch.is-upgraded {
+      padding-left: 28px;
+      display: inline;
+      margin-right: 20px;
+      top: -5px;
+    }
+  }
   ul {
     margin: 0;
     padding: 0px;
@@ -106,6 +141,7 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
 
   .section-body {
     padding: 10px;
+    overflow-y: scroll;
   }
 }
 
@@ -135,19 +171,6 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
     flex-direction: column;
     overflow-y: scroll;
   }
-
-  .debug-status {
-    display: inline;
-    float: right;
-
-    mdl-switch.mdl-switch.is-upgraded {
-      padding-left: 28px;
-      display: inline;
-      margin-right: 20px;
-      top: -5px;
-    }
-  }
-
 }
 
 
@@ -193,24 +216,6 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
         left: 50%;
         transform: translate(-50%, -50%);
       }
-    }
-  }
-
-  .clickable {
-    color: #666;
-    width: 20px;
-    height: 20px;
-    margin: auto;
-    display: inline-block;
-    border-radius: 2px;
-    cursor: default;
-
-    /deep/ mdl-icon {
-      font-size: 20px;
-    }
-    &:hover {
-      background-color: rgba(0,0,0,0.05);
-      color: black;
     }
   }
 
