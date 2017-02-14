@@ -10,7 +10,7 @@ declare variable $serverId external;
 let $current-request := xdmp:request()
 let $a := json:array()
 let $_ :=
-  for $status in xdmp:server-status(xdmp:host(), xs:unsignedLong($serverId))/server:request-statuses/server:request-status[fn:not(server:request-id = $current-request)]
+  for $status in xdmp:server-status(xdmp:host(), (xdmp:server("TaskServer"), xs:unsignedLong($serverId)))/server:request-statuses/server:request-status[fn:not(server:request-id = $current-request)]
   let $o := map:new((
     map:entry("server", xdmp:server-name($status/*:server-id)),
     map:entry("host", xdmp:host-name($status/*:host-id)),

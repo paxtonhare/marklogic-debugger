@@ -15,7 +15,9 @@ import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.types.ValueType;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -156,6 +158,16 @@ public class ApiController {
 			hm.put("serverId", serverId);
 			return evalQuery(auth, "get-requests.xqy", hm);
 		}
+
+	@RequestMapping(value = "/servers/{serverId}/invoke", method = RequestMethod.POST)
+	public ResponseEntity<?> invokeModule(@PathVariable String serverId, @RequestParam String uri) throws InvalidRequestException {
+		ConnectionAuthenticationToken auth = (ConnectionAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
+		HashMap<String, String> hm = new HashMap<>();
+		hm.put("serverId", serverId);
+		hm.put("uri", uri);
+		evalQuery(auth, "invoke-module.xqy", hm);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
 
 	@RequestMapping(value = "/requests/{requestId}/stack", method = RequestMethod.GET)
 	@ResponseBody

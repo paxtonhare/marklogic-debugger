@@ -269,7 +269,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   gutterClick(cm: any, line: number, gutter: string, clickEvent: MouseEvent) {
-    console.log(clickEvent);
     const info = cm.lineInfo(line);
     if (info.gutterMarkers && info.gutterMarkers.breakpoints && clickEvent.which === 3) {
       this.marklogic.disableBreakpoint(this.selectedServer.name, this.currentUri, line);
@@ -283,7 +282,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   getBreakpoints() {
     this.breakpoints = this.marklogic.getAllBreakpoints(this.selectedServer.name);
-    this.breakpointUris = Object.keys(this.breakpoints);
+    this.breakpointUris = Array.from(this.breakpoints.keys());
     if (this.currentUri) {
       this.fileBreakpoints = this.marklogic.getBreakpoints(this.selectedServer.name, this.currentUri);
     } else {
@@ -400,6 +399,14 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.consoleInput = this.commandHistory[this.commandHistory.length - 1 - this.commandHistoryIndex];
       }
     }
+  }
+
+  invokeModule(uri: string) {
+    this.marklogic.invokeModule(this.selectedServer.id, uri).subscribe(() => {
+      setTimeout(() => {
+        this.getRequests();
+      }, 1000);
+    });
   }
 
   showError(errorText: string) {

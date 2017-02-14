@@ -33,7 +33,10 @@
         <gm-divider></gm-divider>
         <div gm-col class="flex flex-70">
           <div class="fill-height" *ngIf="currentUri">
-            <div class="section-title">File View: {{currentUri}}</div>
+            <div class="section-title">
+              <span>File View: {{currentUri}}</span>
+              <span title="Debug this file on the server" class="invoke-module clickable" (click)="invokeModule(currentUri)"><mdl-icon>play_arrow</mdl-icon></span>
+            </div>
             <div class="section-body">
               <app-codemirror *ngIf="fileText"
                 [ngModel]="fileText"
@@ -100,7 +103,7 @@
             <p *ngIf="!breakpointUris || breakpointUris.length === 0">No breakpoints</p>
             <div *ngFor="let uri of breakpointUris">
               <ul>
-                <li *ngFor="let breakpoint of breakpoints[uri]">
+                <li *ngFor="let breakpoint of breakpoints.get(uri)">
                   <span class="breakpoint-symbol" (click)="toggleBreakpoint(breakpoint)" [ngClass]="{ 'enabled' : breakpoint.enabled }">&#x25C9;</span>
                   <span (click)="gotoBreakpoint(breakpoint.uri, breakpoint.line)">{{breakpoint.uri}}:{{breakpoint.line + 1}}</span>
                   <i class="fa fa-times" (click)="disableBreakpoint(breakpoint)"></i>
