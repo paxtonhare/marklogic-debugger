@@ -248,12 +248,16 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   setBreakpoints() {
-    if (!this.breakpointsSet && Object.keys(this.breakpoints).length > 0) {
+    let keys: Array<string>;
+    if (this.breakpoints) {
+      keys = Array.from(this.breakpoints.keys());
+    }
+
+    if (!this.breakpointsSet && keys && keys.length > 0) {
       this.breakpointsSet = true;
       let breakpoints = new Array<Breakpoint>();
-      let keys = Object.keys(this.breakpoints);
       for (let key of keys) {
-        for (let bps of this.breakpoints[key]) {
+        for (let bps of this.breakpoints.get(key)) {
           breakpoints.push(bps);
         }
       }
@@ -270,6 +274,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   gutterClick(cm: any, line: number, gutter: string, clickEvent: MouseEvent) {
     const info = cm.lineInfo(line);
+    this.breakpointsSet = false;
     if (info.gutterMarkers && info.gutterMarkers.breakpoints && clickEvent.which === 3) {
       this.marklogic.disableBreakpoint(this.selectedServer.name, this.currentUri, line);
     } else if (info.gutterMarkers && info.gutterMarkers.breakpoints) {
@@ -291,11 +296,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   toggleBreakpoint(breakpoint: Breakpoint) {
+    this.breakpointsSet = false;
     this.marklogic.toggleBreakpoint(this.selectedServer.name, breakpoint.uri, breakpoint.line);
     this.getBreakpoints();
   }
 
   disableBreakpoint(breakpoint: Breakpoint) {
+    this.breakpointsSet = false;
     this.marklogic.disableBreakpoint(this.selectedServer.name, breakpoint.uri, breakpoint.line);
     this.getBreakpoints();
   }
