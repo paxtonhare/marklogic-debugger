@@ -227,9 +227,10 @@ public class ApiController {
 	@ResponseBody
 	public String setBreakpoints(@PathVariable String requestId, @RequestBody List<Breakpoint> breakpoints) throws InvalidRequestException {
 		ConnectionAuthenticationToken auth = (ConnectionAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
+		HashMap<String, String> hm = new HashMap<>();
+		hm.put("requestId", requestId);
+		evalQuery(auth, "clear-breakpoints.xqy", hm);
 		for (Breakpoint bp : breakpoints) {
-			HashMap<String, String> hm = new HashMap<>();
-			hm.put("requestId", requestId);
 			hm.put("uri", bp.uri);
 			hm.put("line", bp.line);
 			evalQuery(auth, "set-breakpoints.xqy", hm);
@@ -243,7 +244,7 @@ public class ApiController {
 		ConnectionAuthenticationToken auth = (ConnectionAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
 		HashMap<String, String> hm = new HashMap<>();
 		hm.put("requestId", requestId);
-		return evalQuery(auth, "set-breakpoints.xqy", hm);
+		return evalQuery(auth, "get-breakpoints.xqy", hm);
 	}
 
 	@RequestMapping(value = "/requests/{requestId}/eval", method = RequestMethod.POST)
