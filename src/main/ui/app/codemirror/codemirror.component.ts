@@ -196,7 +196,7 @@ export class CodemirrorComponent implements OnInit, OnChanges {
       this.currentStatement = null;
     }
 
-    if (this._value === '' || !this._expression || !this._line) {
+    if (this._value === '' || !this._expression || (this._line === null)) {
       return;
     }
     const lines = this._value.split(/[\r\n]/);

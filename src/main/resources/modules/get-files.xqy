@@ -46,7 +46,6 @@ declare function local:build-dirs($uris as xs:string*, $parent as xs:string)
         $dir
     )
   let $a := json:array()
-  let $_ := local:build-files($uris, $parent, $a)
   let $_ :=
     for $dir in $dirs
     let $o := json:object()
