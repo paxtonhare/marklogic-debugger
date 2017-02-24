@@ -24,7 +24,7 @@ Looking to build the code from source? Look no further.
 You need these to get started
 
 - Java 8 JDK
-- Gradle (the newer the better)
+- Gradle 3.1 or newer
 - Node JS 6.5 or newer
 - Typings `npm -g install typings`
 - A decent IDE. IntelliJ is nice.
