@@ -7,8 +7,6 @@ declare option xdmp:mapping "false";
 
 declare variable $serverId external;
 
-declare variable  $ml-dir := xdmp:filesystem-filepath('.') || '/Modules';
-
 declare function local:build-files($uris as xs:string*, $parent as xs:string, $a as json:array)
 {
   let $parent :=
@@ -46,6 +44,10 @@ declare function local:build-dirs($uris as xs:string*, $parent as xs:string)
         $dir
     )
   let $a := json:array()
+  let $_ :=
+    if ($parent eq '/') then
+      local:build-files($uris, $parent, $a)
+    else ()
   let $_ :=
     for $dir in $dirs
     let $o := json:object()
