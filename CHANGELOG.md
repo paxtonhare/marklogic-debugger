@@ -1,7 +1,16 @@
 # Change Log
 
-## [v1.0.0-alpha.6](https://github.com/paxtonhare/marklogic-debugger/tree/v1.0.0-alpha.6)
+## [Unreleased](https://github.com/paxtonhare/marklogic-debugger/tree/HEAD)
 
+[Full Changelog](https://github.com/paxtonhare/marklogic-debugger/compare/v1.0.0-alpha.6...HEAD)
+
+**Closed issues:**
+
+- Codemirror window isn't full width [\#22](https://github.com/paxtonhare/marklogic-debugger/issues/22)
+- Duplicate URIs in list of modules [\#21](https://github.com/paxtonhare/marklogic-debugger/issues/21)
+- Document Prereqs [\#20](https://github.com/paxtonhare/marklogic-debugger/issues/20)
+
+## [v1.0.0-alpha.6](https://github.com/paxtonhare/marklogic-debugger/tree/v1.0.0-alpha.6) (2017-02-14)
 [Full Changelog](https://github.com/paxtonhare/marklogic-debugger/compare/v1.0.0-alpha.5...v1.0.0-alpha.6)
 
 **Closed issues:**
