@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-subsection',
@@ -8,11 +8,16 @@ import { Component, Input } from '@angular/core';
 export class SubsectionComponent {
   collapsed: boolean = false;
   @Input() title: string;
+  @Output() clickHandler: EventEmitter<MouseEvent> = new EventEmitter<MouseEvent>();
 
   constructor() {}
 
   isCollapsed() {
     return this.collapsed;
+  }
+
+  onClick($event) {
+    this.clickHandler.emit($event);
   }
 
   toggleCollapsed() {

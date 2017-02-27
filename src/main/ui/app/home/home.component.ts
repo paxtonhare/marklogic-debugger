@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Response } from '@angular/http';
 import { MarkLogicService } from '../marklogic';
@@ -26,6 +26,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   requests: any;
   currentUri: string;
   currentLine: number;
+  currentRequest: any;
+  currentStackPosition: number;
   showLine: number;
   currentExpression: string;
   fileText: string;
@@ -42,6 +44,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   welcomeShown: boolean = false;
 
   breakpointsSet: boolean = false;
+
+  @ViewChild('consoleInputCtrl') consoleInputCtrl;
 
   codeMirrorConfig = {
     lineNumbers: true,
@@ -82,37 +86,51 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.router.navigate(['login']);
       }
 
-      this.marklogic.getServers().subscribe((servers: any) => {
-        this.appservers = servers;
-        if (this.appserverName) {
-          let server = _.find(this.appservers, (appserver) => { return appserver.name === this.appserverName; });
-          if (server) {
-            this.selectedServer = server;
-            this.showFiles();
-            this.getRequests();
-            this.getBreakpoints();
+      if (!this.appservers || !this.selectedServer) {
+        this.marklogic.getServers().subscribe((servers: any) => {
+          this.appservers = servers;
+          if (this.appserverName) {
+            let server = _.find(this.appservers, (appserver) => { return appserver.name === this.appserverName; });
+            if (server) {
+              this.selectedServer = server;
+              this.showFiles();
+              this.getRequests();
+              this.getBreakpoints();
+            }
           }
-        }
 
-        if (this.requestId) {
-          this.getStack(this.requestId);
-        } else {
-          this.fileBreakpoints = null;
-          this.currentLine = null;
-          this.showLine = null;
-          this.currentUri = null;
-        }
-
-        if (!this.welcomeShown && localStorage.getItem('_show_welcome_') !== 'false') {
-          this.showWelcome();
-          this.welcomeShown = true;
-        }
-
-      },
-      () => {
-        this.router.navigate(['login']);
-      });
+          this.updateStack();
+        },
+        () => {
+          this.router.navigate(['login']);
+        });
+      }
+      else {
+        this.getRequests();
+        this.updateStack();
+      }
     });
+
+    if (!this.welcomeShown && localStorage.getItem('_show_welcome_') !== 'false') {
+      this.showWelcome();
+      this.welcomeShown = true;
+    }
+
+  }
+
+  updateStack() {
+    if (this.requestId) {
+      this.marklogic.getRequest(this.selectedServer.id, this.requestId).subscribe((request) => {
+        this.currentRequest = request;
+        this.getStack(this.requestId);
+      });
+    } else {
+      this.currentRequest = null;
+      this.fileBreakpoints = null;
+      this.currentLine = null;
+      this.showLine = null;
+      this.currentUri = null;
+    }
   }
 
   showWelcome() {
@@ -161,8 +179,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.marklogic.getStack(requestId).subscribe((stack: any) => {
       this.stack = stack;
       if (this.stack && this.stack.frames && this.stack.frames.length > 0) {
-        const frame = this.stack.frames[0];
-        this.showFile(frame.uri, frame.line);
+        this.showFile(this.stack.frames[0], 0);
       }
     }, () => {
       this.router.navigate(['server', this.appserverName]);
@@ -178,9 +195,21 @@ export class HomeComponent implements OnInit, OnDestroy {
   hasVariables() {
     return this.stack &&
       this.stack.frames &&
-      this.stack.frames[0] &&
-      this.stack.frames[0].variables &&
-      this.stack.frames[0].variables.length > 0;
+      this.stack.frames[this.currentStackPosition] &&
+      (
+        (
+          this.stack.frames[this.currentStackPosition].variables &&
+          this.stack.frames[this.currentStackPosition].variables.length > 0
+        ) ||
+        (
+          this.stack.frames[this.currentStackPosition].externalVariables &&
+          this.stack.frames[this.currentStackPosition].externalVariables.length > 0
+        ) ||
+        (
+          this.stack.frames[this.currentStackPosition].globalVariables &&
+          this.stack.frames[this.currentStackPosition].globalVariables.length > 0
+        )
+      );
   }
 
   debugRequest(requestId) {
@@ -356,18 +385,48 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  showFile(uri: string, line: number) {
+  showEval(frame, index: number) {
     this.currentLine = null;
     this.showLine = null;
-    this.marklogic.getFile(this.selectedServer.id, uri).subscribe((txt: any) => {
-      this.currentUri = uri;
-      this.fileText = txt;
-      this.currentLine = line;
+    if (this.currentRequest) {
+      this.currentUri = '/eval';
+      this.fileText = this.currentRequest.requestText;
+      this.currentLine = frame.line;
+      this.currentStackPosition = index;
       this.getBreakpoints();
       if (this.stack.expressions && this.stack.expressions.length > 0) {
-        this.currentExpression = this.stack.expressions[0].expressionSource;
+        if (index === 0) {
+          this.currentExpression = this.stack.expressions[index].expressionSource;
+        }
+        else {
+          this.currentExpression = null;
+        }
       }
-    });
+    }
+  }
+
+  showFile(frame: any, index: number) {
+    if (frame.uri === '/eval') {
+      this.showEval(frame, index);
+    } else {
+      this.currentLine = null;
+      this.showLine = null;
+      this.marklogic.getFile(this.selectedServer.id, frame.uri).subscribe((txt: any) => {
+        this.currentUri = frame.uri;
+        this.fileText = txt;
+        this.currentLine = frame.line;
+        this.currentStackPosition = index;
+        this.getBreakpoints();
+        if (this.stack.expressions && this.stack.expressions.length > 0) {
+          if (index === 0) {
+            this.currentExpression = this.stack.expressions[index].expressionSource;
+          }
+          else {
+            this.currentExpression = null;
+          }
+        }
+      });
+    }
   }
 
   consoleKeyPressed($event: KeyboardEvent) {
@@ -426,7 +485,23 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  clearConsole() {
+  clearConsole($event: MouseEvent) {
     this.consoleOutput = [];
+    $event.preventDefault();
+    $event.stopPropagation();
+  }
+
+  focusConsole($event) {
+    this.consoleInputCtrl.nativeElement.focus();
+  }
+
+  getRequestName(request) {
+    let name;
+    if (request.requestKind === 'eval') {
+      name = 'eval';
+    } else {
+      name = (request.requestRewrittenText || request.requestText);
+    }
+    return name;
   }
 }

@@ -1,8 +1,17 @@
 # Change Log
 
-## [Unreleased](https://github.com/paxtonhare/marklogic-debugger/tree/HEAD)
+## [v1.0.0-alpha.8](https://github.com/paxtonhare/marklogic-debugger/tree/v1.0.0-alpha.8)
 
-[Full Changelog](https://github.com/paxtonhare/marklogic-debugger/compare/v1.0.0-alpha.6...HEAD)
+[Full Changelog](https://github.com/paxtonhare/marklogic-debugger/compare/v1.0.0-alpha.7...v1.0.0-alpha.8)
+
+**Closed issues:**
+
+- Clear button collapses console window [\#26](https://github.com/paxtonhare/marklogic-debugger/issues/26)
+- Stack browser doesn't work correctly [\#25](https://github.com/paxtonhare/marklogic-debugger/issues/25)
+- Error dialog is too big [\#24](https://github.com/paxtonhare/marklogic-debugger/issues/24)
+
+## [v1.0.0-alpha.7](https://github.com/paxtonhare/marklogic-debugger/tree/v1.0.0-alpha.7) (2017-02-27)
+[Full Changelog](https://github.com/paxtonhare/marklogic-debugger/compare/v1.0.0-alpha.6...v1.0.0-alpha.7)
 
 **Closed issues:**
 

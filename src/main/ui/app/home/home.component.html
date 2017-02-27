@@ -67,8 +67,8 @@
           <div class="section-body">
             <app-subsection [title]="'Stack'">
               <ul *ngIf="hasFrames()" class="frames">
-                <li *ngFor="let frame of stack.frames" [ngClass]="{'active' : frame.uri === currentUri}" (click)="showFile(frame.uri, frame.line)">
-                  <i class="fa fa-long-arrow-right" *ngIf="frame.uri === currentUri"></i>
+                <li *ngFor="let frame of stack.frames; let idx = index" [ngClass]="{'active' : idx === currentStackPosition}" (click)="showFile(frame, idx)">
+                  <i class="fa fa-long-arrow-right" [ngClass]="{'visible': idx === currentStackPosition}"></i>
                   {{frame.uri}}:{{frame.line}}
                 </li>
               </ul>
@@ -78,13 +78,21 @@
             </app-subsection>
             <app-subsection [title]="'Variables'">
               <ul *ngIf="hasVariables()" class="frames">
-                <li *ngFor="let variable of stack.frames[0].variables">{{variable.name}}: {{variable.value}}</li>
+                <template [ngIf]="stack.frames[currentStackPosition] && stack.frames[currentStackPosition].externalVariables">
+                  <li *ngFor="let variable of stack.frames[currentStackPosition].externalVariables">{{variable.name}}: {{variable.value}}</li>
+                </template>
+                <template [ngIf]="stack.frames[currentStackPosition] && stack.frames[currentStackPosition].globalVariables">
+                  <li *ngFor="let variable of stack.frames[currentStackPosition].globalVariables">{{variable.name}}: {{variable.value}}</li>
+                </template>
+                <template [ngIf]="stack.frames[currentStackPosition] && stack.frames[currentStackPosition].variables">
+                  <li *ngFor="let variable of stack.frames[currentStackPosition].variables">{{variable.name}}: {{variable.value}}</li>
+                </template>
               </ul>
               <p *ngIf="!hasVariables()">&nbsp;</p>
             </app-subsection>
-            <app-subsection [title]="'Console'">
+            <app-subsection [title]="'Console'" (clickHandler)="focusConsole($event)">
               <div class="console-buttons" section-header>
-                <button md-button (click)="clearConsole()">Clear</button>
+                <button md-button (click)="clearConsole($event)">Clear</button>
               </div>
               <div *ngFor="let output of consoleOutput" class="console-output">
                 <span *ngIf="output.type === 'e'" class="error">Server Error <a (click)="showError(output.txt)">(show)</a></span>
@@ -92,7 +100,7 @@
                   <span class="prompt">{{output.type === 'i' ? '>' : '<-' }} </span><span>{{output.txt}}</span>
                 </span>
               </div>
-              <span class="prompt">&gt; </span><input class="console-input" type="text" [(ngModel)]="consoleInput" (keyup)="consoleKeyPressed($event)">
+              <span class="prompt">&gt; </span><input #consoleInputCtrl class="console-input" type="text" [(ngModel)]="consoleInput" (keyup)="consoleKeyPressed($event)">
             </app-subsection>
           </div>
         </div>
@@ -126,7 +134,7 @@
             <ul *ngIf="requests && requests.length > 0">
               <li *ngFor="let request of requests" (click)="debugRequest(request.requestId)">
                 <i class="fa fa-long-arrow-right" *ngIf="requestId === request.requestId"></i>
-                {{request.requestRewrittenText || request.requestText}} <span class="request-id">({{request.requestId}})</span>
+                {{getRequestName(request)}} <span class="request-id">({{request.requestId}})</span>
                 <span *ngIf="request.debuggingStatus === 'attached'" class="clickable" title="continue" (click)="continueRequest(request.requestId)"><mdl-icon>play_arrow</mdl-icon></span>
                 <span *ngIf="request.debuggingStatus !== 'attached'" class="clickable" title="pause" (click)="pauseRequest(request.requestId)"><mdl-icon>pause</mdl-icon></span>
               </li>

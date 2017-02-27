@@ -2,6 +2,6 @@
   <mdl-icon>arrow_drop_down</mdl-icon> {{title}}
   <ng-content select="[section-header]"></ng-content>
 </div>
-<div class="body" *ngIf="!isCollapsed()">
+<div class="body" *ngIf="!isCollapsed()" (click)="onClick($event)">
   <ng-content></ng-content>
 </div>

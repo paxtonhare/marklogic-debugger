@@ -159,6 +159,16 @@ public class ApiController {
 			return evalQuery(auth, "get-requests.xqy", hm);
 		}
 
+	@RequestMapping(value = "/servers/{serverId}/requests/{requestId}", method = RequestMethod.GET)
+	@ResponseBody
+	public String getRequest(@PathVariable String serverId, @PathVariable String requestId) throws InvalidRequestException {
+		ConnectionAuthenticationToken auth = (ConnectionAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
+		HashMap<String, String> hm = new HashMap<>();
+		hm.put("serverId", serverId);
+		hm.put("requestId", requestId);
+		return evalQuery(auth, "get-request.xqy", hm);
+	}
+
 	@RequestMapping(value = "/servers/{serverId}/invoke", method = RequestMethod.POST)
 	public ResponseEntity<?> invokeModule(@PathVariable String serverId, @RequestParam String uri) throws InvalidRequestException {
 		ConnectionAuthenticationToken auth = (ConnectionAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
