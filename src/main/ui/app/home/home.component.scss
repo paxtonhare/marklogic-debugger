@@ -4,6 +4,7 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
 
 /deep/ .CodeMirror {
   height: 100%;
+  width: 100%;
 
   .current-statement {
     background-color: $hover-color;

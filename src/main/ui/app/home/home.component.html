@@ -4,7 +4,7 @@
       <mdl-layout-title>
         <span class="server">http://{{hostname}}:{{port}}</span> &#x25CF;
         <span class="selected-server" *ngIf="selectedServer">{{selectedServer.name}} </span>
-        </mdl-layout-title>
+      </mdl-layout-title>
       <mdl-layout-spacer></mdl-layout-spacer>
       <button mdl-button #btn2="mdlButton" (click)="m2.toggle($event, btn2)" mdl-button-type="icon" mdl-ripple><mdl-icon>more_vert</mdl-icon></button>
       <mdl-menu #m2="mdlMenu" mdl-menu-position="bottom-right">

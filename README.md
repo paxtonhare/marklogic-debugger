@@ -4,6 +4,10 @@ A stand alone debugger for MarkLogic Server. Simply download the war and run it.
 
 **_Should_** work with all versions of MarkLogic. Tested with 7, 8, and 9.
 
+## Prerequisites
+
+- You need Java 8 to run the executable war file.
+
 ## Using It
 
 Download the war file from the [releases page](https://github.com/paxtonhare/marklogic-debugger/releases).
