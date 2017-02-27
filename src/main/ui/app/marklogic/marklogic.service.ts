@@ -47,6 +47,10 @@ export class MarkLogicService {
     return this.get(`/api/servers/${serverId}/requests`);
   }
 
+  getRequest(serverId, requestId) {
+    return this.get(`/api/servers/${serverId}/requests/${requestId}`);
+  }
+
   getStack(requestId) {
     return this.get(`/api/requests/${requestId}/stack`);
   }

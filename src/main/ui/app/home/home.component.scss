@@ -249,6 +249,13 @@ ul.frames {
     &:hover {
       background-color: $hover-color;
     }
+
+    .fa-long-arrow-right {
+      visibility: hidden;
+      &.visible {
+        visibility: visible;
+      }
+    }
   }
 }
 
