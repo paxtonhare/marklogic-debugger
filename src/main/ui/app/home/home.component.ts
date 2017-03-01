@@ -100,6 +100,11 @@ export class HomeComponent implements OnInit, OnDestroy {
           }
 
           this.updateStack();
+
+          if (!this.welcomeShown && localStorage.getItem('_show_welcome_') !== 'false') {
+            this.showWelcome();
+            this.welcomeShown = true;
+          }
         },
         () => {
           this.router.navigate(['login']);
@@ -110,12 +115,6 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.updateStack();
       }
     });
-
-    if (!this.welcomeShown && localStorage.getItem('_show_welcome_') !== 'false') {
-      this.showWelcome();
-      this.welcomeShown = true;
-    }
-
   }
 
   updateStack() {
