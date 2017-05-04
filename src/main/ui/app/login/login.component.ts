@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { AuthModel, AuthService } from '../auth';
 import { MarkLogicService } from '../marklogic';
 
+import * as _ from 'lodash';
+
 @Component({
   selector: 'app-login-form',
   templateUrl: './login.component.html',
@@ -11,7 +13,10 @@ import { MarkLogicService } from '../marklogic';
 export class LoginComponent {
   authInfo: AuthModel = new AuthModel('localhost', 8000, 'admin', 'admin');
   appServers: Array<any>;
+  modulesDbs: Array<any>;
   currentServer: any;
+  currentModulesDb: any;
+  modulesRoot: string;
   invalidLogin: boolean = false;
   serverOk: boolean = false;
 
@@ -20,6 +25,9 @@ export class LoginComponent {
     private marklogicService: MarkLogicService,
     private router: Router) {
     this.checkServer();
+    this.currentServer = this.marklogicService.currentServer;
+    this.currentModulesDb = this.marklogicService.currentModulesDb;
+    this.modulesRoot = this.marklogicService.modulesRoot;
   }
 
   updateHostname(hostname: any) {
@@ -44,9 +52,7 @@ export class LoginComponent {
   login(): void {
     this.invalidLogin = false;
     this.authService.login(this.authInfo).subscribe(() => {
-      this.marklogicService.getServers().subscribe((servers) => {
-        this.appServers = servers;
-      });
+      this.startDebugging();
     },
     (error: any) => {
       if (error.status === 401) {
@@ -57,10 +63,22 @@ export class LoginComponent {
 
   selectServer(server) {
     this.currentServer = server;
+    if (this.modulesDbs) {
+      this.currentModulesDb = _.find(this.modulesDbs, (db) => {
+        return _.includes(db.appserverIds, server.id);
+      });
+    }
+  }
 
+  selectModulesDb(modulesDb) {
+    this.currentModulesDb = modulesDb;
+  }
+
+  selectRootPath(modulesRoot) {
+    this.modulesRoot = modulesRoot;
   }
 
   startDebugging() {
-    this.router.navigate(['server', this.currentServer.name]);
+    this.router.navigate(['server']);
   }
 }

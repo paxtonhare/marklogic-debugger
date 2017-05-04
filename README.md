@@ -33,3 +33,8 @@ Use Chrome or FireFox or Safari. Not tested in IE.
 Want to contribute? Perhaps you just want to poke the code?
 
 Look at our [CONTRIBUTING.md](https://github.com/paxtonhare/marklogic-debugger/blob/master/CONTRIBUTING.md#building-the-debugger-from-source) file for details on building from source.
+
+## Video Walkthrough
+
+Click below to watch a video walkthrough of using the Debugger (via youtube).
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/gehl1hp4Bvw/0.jpg)](http://www.youtube.com/watch?v=gehl1hp4Bvw "Introduction to the MarkLogic Debugger")

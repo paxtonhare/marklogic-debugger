@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { RouterModule } from '@angular/router';
-import { MdlModule } from 'angular2-mdl';
+import { MdlModule } from '@angular-mdl/core';
 import { GridManiaModule } from './grid';
 
 import { CodemirrorComponent } from './codemirror';
@@ -20,6 +20,11 @@ import { MarkLogicService } from './marklogic';
 import { ROUTES } from './app.routes';
 import { StartupComponent } from './help';
 
+import { TruncateCharactersPipe } from 'ng2-truncate/dist/truncate-characters.pipe'
+import { TruncateWordsPipe } from 'ng2-truncate/dist/truncate-words.pipe';
+import { SettingsComponent, SettingsService } from './settings'
+
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -30,14 +35,16 @@ import { StartupComponent } from './help';
     ErrorComponent,
     SubsectionComponent,
     CodemirrorComponent,
-    StartupComponent
+    StartupComponent,
+    TruncateCharactersPipe,
+    TruncateWordsPipe,
+    SettingsComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpModule,
     RouterModule.forRoot(ROUTES, { useHash: true }),
-    // MaterialModule.forRoot()
     MdlModule,
     GridManiaModule
   ],
@@ -47,7 +54,8 @@ import { StartupComponent } from './help';
   ],
   providers: [
     AUTH_PROVIDERS,
-    MarkLogicService
+    MarkLogicService,
+    SettingsService
   ],
   bootstrap: [AppComponent]
 })

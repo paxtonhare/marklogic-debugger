@@ -5,7 +5,8 @@ import module namespace admin = "http://marklogic.com/xdmp/admin"
 
 declare option xdmp:mapping "false";
 
-declare variable $serverId external;
+declare variable $databaseId external;
+declare variable $modulesRoot external;
 
 declare function local:build-files($uris as xs:string*, $parent as xs:string, $a as json:array)
 {
@@ -91,10 +92,7 @@ declare function local:get-system-dirs($root-dir, $dirs, $a as json:array) {
       json:array-push($a, $o)
 };
 
-let $server-id := xs:unsignedLong($serverId)
-let $config := admin:get-configuration()
-let $modules-db := admin:appserver-get-modules-database($config, $server-id)
-let $server-root := admin:appserver-get-root($config, $server-id)
+let $modules-db := xs:unsignedLong($databaseId)
 let $obj :=
   if ($modules-db = 0) then
     let $o := json:object()
@@ -102,8 +100,8 @@ let $obj :=
     let $_ := map:put($o, "type", "dir")
     let $_ := map:put($o, "collapsed", fn:false())
     let $children := json:array()
-    let $dirs := xdmp:filesystem-directory($server-root)
-    let $_ := local:get-system-dirs($server-root, $dirs, $children)
+    let $dirs := xdmp:filesystem-directory($modulesRoot)
+    let $_ := local:get-system-dirs($modulesRoot, $dirs, $children)
     let $_ := map:put($o, "children", $children)
     return
       $o

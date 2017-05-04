@@ -94,6 +94,13 @@ public class ApiController {
 				return evalQuery(auth, "get-servers.xqy");
 		}
 
+		@RequestMapping(value = "/modules-dbs", method = RequestMethod.GET)
+		@ResponseBody
+		public String getModulesDatabases() throws InvalidRequestException {
+			ConnectionAuthenticationToken auth = (ConnectionAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
+			return evalQuery(auth, "get-modules-databases.xqy");
+		}
+
 		@RequestMapping(value = "/servers/{serverId}/enable", method = RequestMethod.GET)
 		@ResponseBody
 		public String enableServer(@PathVariable String serverId) throws InvalidRequestException {
@@ -121,12 +128,13 @@ public class ApiController {
 				return evalQuery(auth, "disable-server.xqy", hm);
 		}
 
-		@RequestMapping(value = "/servers/{serverId}/files", method = RequestMethod.GET)
+		@RequestMapping(value = "/dbs/{databaseId}/files", method = RequestMethod.GET)
 		@ResponseBody
-		public String getServerFiles(@PathVariable String serverId) throws InvalidRequestException {
+		public String getServerFiles(@PathVariable String databaseId, @RequestParam String modulesRoot) throws InvalidRequestException {
 				ConnectionAuthenticationToken auth = (ConnectionAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
 				HashMap<String, String> hm = new HashMap<>();
-				hm.put("serverId", serverId);
+				hm.put("databaseId", databaseId);
+				hm.put("modulesRoot", modulesRoot);
 				return evalQuery(auth, "get-files.xqy", hm);
 		}
 
@@ -140,22 +148,22 @@ public class ApiController {
 	}
 
 
-		@RequestMapping(value = "/servers/{serverId}/file", method = RequestMethod.GET)
+		@RequestMapping(value = "/dbs/{databaseId}/file", method = RequestMethod.GET)
 		@ResponseBody
-		public String getServerFile(@PathVariable String serverId, @RequestParam String uri) throws InvalidRequestException {
+		public String getServerFile(@PathVariable String databaseId, @RequestParam String modulesRoot, @RequestParam String uri) throws InvalidRequestException {
 				ConnectionAuthenticationToken auth = (ConnectionAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
 				HashMap<String, String> hm = new HashMap<>();
-				hm.put("serverId", serverId);
+				hm.put("databaseId", databaseId);
+				hm.put("modulesRoot", modulesRoot);
 				hm.put("uri", uri);
 				return evalQuery(auth, "get-file.xqy", hm);
 		}
 
-		@RequestMapping(value = "/servers/{serverId}/requests", method = RequestMethod.GET)
+		@RequestMapping(value = "/requests", method = RequestMethod.GET)
 		@ResponseBody
-		public String getRequests(@PathVariable String serverId) throws InvalidRequestException {
+		public String getRequests() throws InvalidRequestException {
 			ConnectionAuthenticationToken auth = (ConnectionAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
 			HashMap<String, String> hm = new HashMap<>();
-			hm.put("serverId", serverId);
 			return evalQuery(auth, "get-requests.xqy", hm);
 		}
 
@@ -279,7 +287,7 @@ public class ApiController {
 		private String getQuery(String resourceName) {
 				try {
 						InputStream inputStream = AppController.class.getClassLoader().getResourceAsStream("modules/" + resourceName);
-						return IOUtils.toString(inputStream);
+						return "(: marklogic-debugger-code :)\n" + IOUtils.toString(inputStream);
 				}
 				catch(IOException e) {
 						e.printStackTrace();

@@ -2,12 +2,13 @@ import { Component, EventEmitter, OnInit, OnDestroy, ViewChild } from '@angular/
 import { Observable } from 'rxjs/Observable';
 import { Response } from '@angular/http';
 import { MarkLogicService } from '../marklogic';
+import { SettingsService } from '../settings';
 import { Breakpoint } from '../marklogic';
 import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
 import { AuthService } from '../auth';
 import { ErrorComponent } from '../error';
 import { StartupComponent } from '../help';
-import { MdlDialogService, MdlDialogReference } from 'angular2-mdl';
+import { MdlDialogService, MdlDialogReference } from '@angular-mdl/core';
 import * as _ from 'lodash';
 
 @Component({
@@ -17,8 +18,11 @@ import * as _ from 'lodash';
 })
 export class HomeComponent implements OnInit, OnDestroy {
 
-  appservers: Array<any>;
-  selectedServer: any;
+  modulesDatabases: any;
+  appServers: Array<any>;
+  modulesRoots: Array<string> = new Array<string>();
+  modulesDb: any;
+  modulesRoot: string;
   hostname: string;
   port: number;
   serverFiles: any;
@@ -36,6 +40,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   fileBreakpoints: Array<Breakpoint>;
   requestId: string;
   appserverName: any;
+  modulesDbName: any;
   stack: any;
   consoleInput: string;
   consoleOutput: Array<any> = [];
@@ -60,69 +65,65 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   };
 
-  private sub: any;
-  private sub2: any;
+  private queryParamListener: any;
 
   constructor(
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
     private dialogService: MdlDialogService,
-    private marklogic: MarkLogicService) {
+    private marklogic: MarkLogicService,
+    private settings: SettingsService) {
     this.hostname = authService.hostname;
     this.port = authService.port;
+
+    this.marklogic.getModulesDbs().subscribe((databases) => {
+      this.modulesDatabases = databases;
+    });
+
+    this.marklogic.getServers().subscribe((servers) => {
+      this.appServers = servers;
+
+      this.modulesRoots = new Array<string>();
+      for (let server of this.appServers) {
+        if (server.modulesDb === '0') {
+          this.modulesRoots.push(server.root);
+        }
+      }
+    });
+
+
   }
 
   ngOnInit() {
-    this.sub = this.route.params.subscribe(params => {
-      this.appserverName = params['appserverName'];
-    });
+    this.showFiles();
+    this.getRequests();
+    this.getBreakpoints();
+    this.updateStack();
 
-    this.sub2 = this.route.queryParams.subscribe(params => {
-      this.breakpointsSet = false;
-      this.requestId = params['requestId'];
 
-      if (!this.appserverName) {
-        this.router.navigate(['login']);
-      }
+    if (!this.welcomeShown && localStorage.getItem('_show_welcome_') !== 'false') {
+      this.showWelcome();
+      this.welcomeShown = true;
+    }
+  }
 
-      if (!this.appservers || !this.selectedServer) {
-        this.marklogic.getServers().subscribe((servers: any) => {
-          this.appservers = servers;
-          if (this.appserverName) {
-            let server = _.find(this.appservers, (appserver) => { return appserver.name === this.appserverName; });
-            if (server) {
-              this.selectedServer = server;
-              this.showFiles();
-              this.getRequests();
-              this.getBreakpoints();
-            }
-          }
-
-          this.updateStack();
-
-          if (!this.welcomeShown && localStorage.getItem('_show_welcome_') !== 'false') {
-            this.showWelcome();
-            this.welcomeShown = true;
-          }
-        },
-        () => {
-          this.router.navigate(['login']);
-        });
-      }
-      else {
+  reset(getRequest: boolean = true) {
+      this.currentRequest = null;
+      this.fileBreakpoints = null;
+      this.currentLine = null;
+      this.showLine = null;
+      this.currentUri = null;
+      this.stack = null;
+      this.fileText = null;
+      if (getRequest) {
         this.getRequests();
-        this.updateStack();
       }
-    });
   }
 
   updateStack() {
-    if (this.requestId) {
-      this.marklogic.getRequest(this.selectedServer.id, this.requestId).subscribe((request) => {
-        this.currentRequest = request;
-        this.getStack(this.requestId);
-      });
+    if (this.currentRequest) {
+      this.getStack(this.currentRequest.requestId);
     } else {
       this.currentRequest = null;
       this.fileBreakpoints = null;
@@ -141,9 +142,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   handleDebugError(error: Response) {
     if (error.status === 404 && error.text() === 'Request ID not found') {
-      let res = this.dialogService.alert(`The current Request: ${this.requestId} is no longer available.`);
+      let res = this.dialogService.alert(`The current Request: ${this.currentRequest.requestId} is no longer available.`);
       res.subscribe(() => {
-        this.router.navigate(['server', this.appserverName]);
+        this.reset();
       });
     }
   }
@@ -153,8 +154,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.sub.unsubscribe();
-    this.sub2.unsubscribe();
+    if (this.queryParamListener) {
+      this.queryParamListener.unsubscribe();
+    }
   }
 
   logout() {
@@ -163,14 +165,31 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
+  hideDebuggerRequests(requests) {
+    if (this.settings.hideDebuggerRequests) {
+      return _.filter(requests, (request: any) => {
+        return !(request.requestText && request.requestText.match(/\(: marklogic-debugger-code :\)/));
+      });
+    }
+    return requests;
+  }
+
   getRequests() {
-    this.marklogic.getRequests(this.selectedServer.id).subscribe((requests: any) => {
-      this.requests = requests;
-      if (this.requests === null || this.requests.length === 0) {
-        this.router.navigate(['server', this.appserverName]);
+    this.marklogic.getRequests().subscribe((requests: any) => {
+      this.requests = this.hideDebuggerRequests(requests);
+      if (this.requests == null || this.requests.length === 0) {
+        this.reset(false);
+      }
+      else if (this.currentRequest) {
+        if (!_.find(this.requests, (req: any) => {
+          return this.currentRequest.requestId === req.requestId;
+        })) {
+          this.reset(false);
+        }
       }
     },() => {
       this.requests = null;
+      this.reset(false);
     });
   }
 
@@ -181,7 +200,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.showFile(this.stack.frames[0], 0);
       }
     }, () => {
-      this.router.navigate(['server', this.appserverName]);
+      this.reset();
     });
   }
 
@@ -211,18 +230,35 @@ export class HomeComponent implements OnInit, OnDestroy {
       );
   }
 
-  debugRequest(requestId) {
-    let navigationExtras: NavigationExtras = {
-      queryParams: { 'requestId': requestId }
-    };
+  debugRequest(request) {
+    if (request.isExpired) {
+      return;
+    }
 
-    this.router.navigate(['server', this.appserverName], navigationExtras);
+    this.currentRequest = request;
+
+    let modulesDb = _.find(this.modulesDatabases, (database: any) => {
+      return database.name === request.modules;
+    });
+
+    if (!modulesDb) {
+      modulesDb = this.modulesDb;
+    }
+
+    if (modulesDb) {
+      this.modulesDb = modulesDb;
+      this.modulesRoot = request.root;
+      this.showFiles();
+      this.currentUri = null;
+      this.fileText = null;
+      this.updateStack();
+    }
   }
 
   stepOver() {
     this.setBreakpoints().subscribe(() => {
-      this.marklogic.stepOver(this.requestId).subscribe(() => {
-        this.getStack(this.requestId);
+      this.marklogic.stepOver(this.currentRequest.requestId).subscribe(() => {
+        this.getStack(this.currentRequest.requestId);
       });
     },
     (error) => {
@@ -232,8 +268,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   stepIn() {
     this.setBreakpoints().subscribe(() => {
-      this.marklogic.stepIn(this.requestId).subscribe(() => {
-        this.getStack(this.requestId);
+      this.marklogic.stepIn(this.currentRequest.requestId).subscribe(() => {
+        this.getStack(this.currentRequest.requestId);
       });
     },
     (error) => {
@@ -243,8 +279,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   stepOut() {
     this.setBreakpoints().subscribe(() => {
-      this.marklogic.stepOut(this.requestId).subscribe(() => {
-        this.getStack(this.requestId);
+      this.marklogic.stepOut(this.currentRequest.requestId).subscribe(() => {
+        this.getStack(this.currentRequest.requestId);
       });
     },
     (error) => {
@@ -254,8 +290,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   continue() {
     this.setBreakpoints().subscribe((x: any) => {
-      this.marklogic.continue(this.requestId).subscribe(() => {
-        this.getStack(this.requestId);
+      this.marklogic.continue(this.currentRequest.requestId).subscribe(() => {
+        this.getStack(this.currentRequest.requestId);
       });
     },
     (error) => {
@@ -263,16 +299,20 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  continueRequest(requestId) {
+  continueRequest(requestId, $event) {
     this.marklogic.continue(requestId).subscribe(() => {
       this.getRequests();
     });
+    $event.preventDefault();
+    $event.stopPropagation();
   }
 
-  pauseRequest(requestId) {
+  pauseRequest(requestId, $event) {
     this.marklogic.pause(requestId).subscribe(() => {
       this.debugRequest(requestId);
     });
+    $event.preventDefault();
+    $event.stopPropagation();
   }
 
   setBreakpoints() {
@@ -289,7 +329,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           breakpoints.push(bps);
         }
       }
-      return this.marklogic.sendBreakpoints(this.requestId, breakpoints);
+      return this.marklogic.sendBreakpoints(this.currentRequest.requestId, breakpoints);
     }
 
     return Observable.of({});
@@ -304,20 +344,20 @@ export class HomeComponent implements OnInit, OnDestroy {
     const info = cm.lineInfo(line);
     this.breakpointsSet = false;
     if (info.gutterMarkers && info.gutterMarkers.breakpoints && clickEvent.which === 3) {
-      this.marklogic.disableBreakpoint(this.selectedServer.name, this.currentUri, line);
+      this.marklogic.disableBreakpoint(this.currentUri, line);
     } else if (info.gutterMarkers && info.gutterMarkers.breakpoints) {
-      this.marklogic.toggleBreakpoint(this.selectedServer.name, this.currentUri, line);
+      this.marklogic.toggleBreakpoint(this.currentUri, line);
     } else {
-      this.marklogic.enableBreakpoint(this.selectedServer.name, this.currentUri, line);
+      this.marklogic.enableBreakpoint(this.currentUri, line);
     }
     this.getBreakpoints();
   }
 
   getBreakpoints() {
-    this.breakpoints = this.marklogic.getAllBreakpoints(this.selectedServer.name);
+    this.breakpoints = this.marklogic.getAllBreakpoints();
     this.breakpointUris = Array.from(this.breakpoints.keys());
-    if (this.currentUri) {
-      this.fileBreakpoints = this.marklogic.getBreakpoints(this.selectedServer.name, this.currentUri);
+    if (this.currentUri !== null) {
+      this.fileBreakpoints = this.marklogic.getBreakpoints(this.currentUri);
     } else {
       this.fileBreakpoints = null;
     }
@@ -325,47 +365,51 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   toggleBreakpoint(breakpoint: Breakpoint) {
     this.breakpointsSet = false;
-    this.marklogic.toggleBreakpoint(this.selectedServer.name, breakpoint.uri, breakpoint.line);
+    this.marklogic.toggleBreakpoint(breakpoint.uri, breakpoint.line);
     this.getBreakpoints();
   }
 
   disableBreakpoint(breakpoint: Breakpoint) {
     this.breakpointsSet = false;
-    this.marklogic.disableBreakpoint(this.selectedServer.name, breakpoint.uri, breakpoint.line);
+    this.marklogic.disableBreakpoint(breakpoint.uri, breakpoint.line);
     this.getBreakpoints();
   }
 
-  toggleConnected(server) {
+  toggleConnected(server: any) {
     return server.connected ? this.enableServer(server) : this.disableServer(server);
   }
 
-  enableServer(server) {
+  enableServer(server: any) {
     this.marklogic.enableServer(server.id).subscribe(() => {
       server.connected = true;
     });
   }
 
-  disableServer(server) {
+  disableServer(server: any) {
     this.marklogic.disableServer(server.id).subscribe(() => {
       server.connected = false;
     });
   }
 
   showFiles() {
-    this.marklogic.getFiles(this.selectedServer.id).subscribe((files: any) => {
-      this.serverFiles = files;
-    });
+    if (this.modulesDb && this.modulesRoot) {
+      this.marklogic.getFiles(this.modulesDb.id, this.modulesRoot).subscribe((files: any) => {
+        this.serverFiles = files;
+      });
 
-    this.marklogic.getSystemFiles().subscribe((files: any) => {
-      this.systemFiles = files;
-    });
+      if (!this.systemFiles) {
+        this.marklogic.getSystemFiles().subscribe((files: any) => {
+          this.systemFiles = files;
+        });
+      }
+    }
   }
 
   fileClicked(uri) {
     this.fileBreakpoints = null;
     this.currentLine = null;
     this.showLine = null;
-    this.marklogic.getFile(this.selectedServer.id, uri).subscribe((txt: any) => {
+    this.marklogic.getFile(uri, this.modulesDb.id, this.modulesRoot).subscribe((txt: any) => {
       this.currentUri = uri;
       this.fileText = txt;
       this.getBreakpoints();
@@ -376,7 +420,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.fileBreakpoints = null;
     this.currentLine = null;
     this.showLine = null;
-    this.marklogic.getFile(this.selectedServer.id, uri).subscribe((txt: any) => {
+    this.marklogic.getFile(uri, this.modulesDb.id, this.modulesRoot).subscribe((txt: any) => {
       this.currentUri = uri;
       this.showLine = line;
       this.fileText = txt;
@@ -385,6 +429,26 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   showEval(frame, index: number) {
+    this.currentLine = null;
+    this.showLine = null;
+    if (this.currentRequest) {
+      this.currentUri = '';
+      this.currentLine = frame.line;
+      this.currentStackPosition = index;
+      this.getBreakpoints();
+      if (this.stack.expressions && this.stack.expressions.length > 0) {
+        if (index === 0) {
+          this.currentExpression = this.stack.expressions[index].expressionSource;
+          this.fileText = this.stack.expressions[index].evalSource;
+        }
+        else {
+          this.currentExpression = null;
+        }
+      }
+    }
+  }
+
+  showInvoke(frame, index: number) {
     this.currentLine = null;
     this.showLine = null;
     if (this.currentRequest) {
@@ -405,12 +469,32 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   showFile(frame: any, index: number) {
-    if (frame.uri === '/eval') {
+    if (frame.type === 'xdmp:eval') {
       this.showEval(frame, index);
+    }
+    else if (frame.type === 'invoke') {
+      this.showInvoke(frame, index);
     } else {
       this.currentLine = null;
       this.showLine = null;
-      this.marklogic.getFile(this.selectedServer.id, frame.uri).subscribe((txt: any) => {
+
+      let uri = frame.uri;
+      let modulesRoot = this.modulesRoot;
+      let modulesDb = null;
+      if (frame.location && frame.location.database) {
+        modulesRoot = '/';
+
+        uri = frame.location.uri;
+
+        let db = _.find(this.modulesDatabases, (database: any) => {
+          return database.id === frame.location.database;
+        });
+
+        if (db) {
+          modulesDb = db;
+        }
+      }
+      this.marklogic.getFile(uri, modulesDb.id, modulesRoot).subscribe((txt: any) => {
         this.currentUri = frame.uri;
         this.fileText = txt;
         this.currentLine = frame.line;
@@ -429,7 +513,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   consoleKeyPressed($event: KeyboardEvent) {
-    if (!this.requestId) {
+    if (!this.currentRequest) {
       return;
     }
     if ($event.keyCode === 13) {
@@ -438,7 +522,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         type: 'i'
       });
       this.commandHistory.push(this.consoleInput);
-      this.marklogic.valueExpression(this.requestId, this.consoleInput).subscribe((output: any) => {
+      this.marklogic.valueExpression(this.currentRequest.requestId, this.consoleInput).subscribe((output: any) => {
         if (!output.error) {
           this.consoleOutput.push({
             txt: output.resp,
@@ -466,11 +550,14 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
-  invokeModule(uri: string) {
-    this.marklogic.invokeModule(this.selectedServer.id, uri).subscribe(() => {
+  invokeModule(uri: string, serverId) {
+    this.marklogic.invokeModule(serverId, uri).subscribe(() => {
       setTimeout(() => {
         this.getRequests();
       }, 1000);
+    },
+    (error: Response) => {
+      this.showError(error.json().message);
     });
   }
 
@@ -502,5 +589,42 @@ export class HomeComponent implements OnInit, OnDestroy {
       name = (request.requestRewrittenText || request.requestText);
     }
     return name;
+  }
+
+  selectModulesDb(modulesDb) {
+    this.modulesRoot = null;
+    this.modulesDb = modulesDb;
+    if (this.modulesDb.id !== 0) {
+      this.modulesRoot = '/';
+      this.showFiles();
+    } else {
+      this.serverFiles = null;
+    }
+  }
+
+  selectModulesRoot(root) {
+    this.modulesRoot = root;
+    this.showFiles();
+  }
+
+  currentModulesDb() {
+    if (this.modulesDb) {
+      return this.modulesDb.name;
+    }
+
+    return 'Choose Modules Database';
+  }
+
+  currentModulesRoot() {
+    if (this.modulesRoot) {
+      return this.modulesRoot;
+    }
+    return 'Choose One';
+  }
+
+  connectedServerCount() {
+    return _.reduce(this.appServers, (sum, server) => {
+      return sum + (server.connected ? 1 : 0);
+    }, 0);
   }
 }

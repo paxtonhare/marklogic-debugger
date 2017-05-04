@@ -17,11 +17,27 @@ declare function local:build-var-array($vars) {
 let $stack := dbg:stack(xs:unsignedLong($requestId))
 let $e := json:array()
 let $_ :=
-  for $expr in $stack/*:expr
+  for $expr at $i in $stack/*:expr
+  let $uri := $expr/*:uri/fn:data()
+  let $is-qconsole :=
+    (
+      fn:string-length($uri) eq 0 and
+      ($stack/*:frame/*:uri = "/MarkLogic/appservices/qconsole/qconsole-amped.xqy")
+    )
   let $expression := map:new((
     map:entry("expressionId", $expr/*:expr-id/fn:data()),
     map:entry("expressionSource", $expr/*:expr-source/fn:data()),
-    map:entry("uri", $expr/*:uri/fn:data()),
+    map:entry("uri", $uri),
+    map:entry("type",
+      if ($is-qconsole) then
+        "xdmp:eval"
+      else if ($uri = "/eval") then
+        "invoke"
+      else
+        ""),
+    if ($is-qconsole) then
+      map:entry("evalSource", dbg:value(xs:unsignedLong($requestId), "xdmp:get-request-body()"))
+    else (),
     map:entry("location", map:new((
       map:entry("database", $expr/*:location/*:database/fn:data()),
       map:entry("uri", $expr/*:location/*:uri/fn:data())
@@ -36,9 +52,22 @@ let $_ :=
 let $f := json:array()
 let $_ :=
   for $frame in $stack/*:frame
+  let $uri := $frame/*:uri/fn:data()
+  let $is-qconsole :=
+    (
+      fn:string-length($uri) eq 0 and
+      ($stack/*:frame/*:uri = "/MarkLogic/appservices/qconsole/qconsole-amped.xqy")
+    )
   return
     json:array-push($f, map:new((
-      map:entry("uri", $frame/*:uri/fn:data()),
+      map:entry("uri", $uri),
+      map:entry("type",
+        if ($is-qconsole) then
+          "xdmp:eval"
+        else if ($uri = "/eval") then
+          "invoke"
+        else
+          ""),
       map:entry("location", map:new((
         map:entry("database", $frame/*:location/*:database/fn:data()),
         map:entry("uri", $frame/*:location/*:uri/fn:data())

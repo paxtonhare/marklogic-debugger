@@ -185,7 +185,7 @@ export class CodemirrorComponent implements OnInit, OnChanges {
 
 
   jumpToLine(line: number) {
-    if (this.instance && line && this._value !== '') {
+    if (this.instance && line && this._value !== '' && this._value.split(/[\r\n]/).length > line) {
       this.instance.scrollIntoView({line: line, ch: 0}, 40);
     }
   }

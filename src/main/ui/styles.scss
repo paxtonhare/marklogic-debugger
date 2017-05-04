@@ -1,6 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 @import "../../../node_modules/codemirror/lib/codemirror.css";
-@import "~angular2-mdl/scss/color-definitions";
+@import "~@angular-mdl/core/scss/color-definitions";
 
 $fa-font-path: "../../../node_modules/font-awesome/fonts";
 @import "../../../node_modules/font-awesome/scss/font-awesome";
@@ -19,7 +19,7 @@ body {
 
 $color-primary: $palette-debugger-500;
 $color-primary-dark: $palette-blue-700;
-$color-accent: $palette-amber-A200;
+$color-accent: $palette-debugger-A200;
 $color-primary-contrast: $color-dark-contrast;
 $color-accent-contrast: $color-dark-contrast;
 
@@ -31,4 +31,4 @@ $color-accent-contrast: $color-dark-contrast;
   height: 64px;
 }
 
-@import '~angular2-mdl/scss/material-design-lite';
+@import '~@angular-mdl/core/scss/material-design-lite';

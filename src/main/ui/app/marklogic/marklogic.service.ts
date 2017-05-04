@@ -1,39 +1,55 @@
 import { Injectable } from '@angular/core';
 import { Headers, Http, RequestOptionsArgs, Response } from '@angular/http';
 import { Breakpoint } from './breakpoint';
+import { AuthService } from '../auth';
 
 import * as _ from 'lodash';
 
 @Injectable()
 export class MarkLogicService {
 
-  constructor(private http: Http) {}
+  currentServer: any;
+  currentModulesDb: any;
+  modulesRoot: string;
+
+  constructor(
+    private http: Http,
+    private auth: AuthService) {
+    let parsed = JSON.parse(localStorage.getItem('_debugger_current_server'));
+    if (parsed) {
+      this.currentServer = parsed;
+    }
+  }
 
   getServers() {
     return this.get('/api/servers');
   }
 
+  getModulesDbs() {
+    return this.get('/api/modules-dbs');
+  }
+
   enableServer(serverId) {
-    return this.http.get('/api/servers/' + serverId + '/enable');
+    return this.http.get(`/api/servers/${serverId}/enable`);
   }
 
   disableServer(serverId) {
-    return this.http.get('/api/servers/' + serverId + '/disable');
+    return this.http.get(`/api/servers/${serverId}/disable`);
   }
 
-  getFiles(serverId) {
-    return this.get('/api/servers/' + serverId + '/files');
+  getFiles(databaseId, modulesRoot) {
+    return this.get(`/api/dbs/${databaseId}/files?modulesRoot=${modulesRoot}`);
   }
 
   getSystemFiles() {
     return this.get('/api/marklogic/files');
   }
 
-  getFile(serverId, uri) {
+  getFile(uri, databaseId, modulesRoot) {
     let options: RequestOptionsArgs = {
       headers: new Headers({'Accept': 'text/plain'})
     };
-    const url = '/api/servers/' + serverId + '/file?uri=' + uri;
+    const url = `/api/dbs/${databaseId}/file?uri=${uri}&modulesRoot=${modulesRoot}`;
     return this.http.get(url, options).map((resp: Response) => {
       return resp.text();
     });
@@ -43,8 +59,8 @@ export class MarkLogicService {
     return this.get(`/api/servers/${serverId}`);
   }
 
-  getRequests(serverId) {
-    return this.get(`/api/servers/${serverId}/requests`);
+  getRequests() {
+    return this.get(`/api/requests`);
   }
 
   getRequest(serverId, requestId) {
@@ -89,9 +105,9 @@ export class MarkLogicService {
     return this.http.get('/hub/traces/ids?q=' + query);
   }
 
-  getAllBreakpoints(server: string): Map<string, Array<Breakpoint>> {
+  getAllBreakpoints(): Map<string, Array<Breakpoint>> {
     let map = new Map<string, Array<Breakpoint>>();
-    let parsed = JSON.parse(localStorage.getItem(`breakpoints-${server}`));
+    let parsed = JSON.parse(localStorage.getItem(`breakpoints`));
     if (parsed) {
       Object.keys(parsed).forEach((key) => {
         let breakpoints = new Array<Breakpoint>();
@@ -105,35 +121,35 @@ export class MarkLogicService {
     return map;
   }
 
-  getBreakpoints(server: string, uri: string): Array<Breakpoint> {
-    let breakpoints = this.getAllBreakpoints(server);
+  getBreakpoints(uri: string): Array<Breakpoint> {
+    let breakpoints = this.getAllBreakpoints();
     return breakpoints.get(uri) || new Array<Breakpoint>();
   }
 
-  enableBreakpoint(server: string, uri: string, line: number) {
-    let breakpoints = this.getBreakpoints(server, uri);
+  enableBreakpoint(uri: string, line: number) {
+    let breakpoints = this.getBreakpoints(uri);
     breakpoints.push(new Breakpoint(uri, line, true));
-    this.setBreakpoints(server, uri, breakpoints);
+    this.setBreakpoints(uri, breakpoints);
   }
 
-  toggleBreakpoint(server: string, uri: string, line: number) {
-    let breakpoints = this.getBreakpoints(server, uri);
+  toggleBreakpoint(uri: string, line: number) {
+    let breakpoints = this.getBreakpoints(uri);
     let breakpoint = _.find(breakpoints, (breakpoint: Breakpoint) => {
       return breakpoint.uri === uri && breakpoint.line === line;
     });
     if (breakpoint) {
       breakpoint.enabled = !breakpoint.enabled;
-      this.setBreakpoints(server, uri, breakpoints);
+      this.setBreakpoints(uri, breakpoints);
     }
   }
 
-  disableBreakpoint(server: string, uri: string, line: number) {
-    let breakpoints: Array<Breakpoint> = this.getBreakpoints(server, uri);
+  disableBreakpoint(uri: string, line: number) {
+    let breakpoints: Array<Breakpoint> = this.getBreakpoints(uri);
     _.remove(breakpoints, (bp) => { return bp.line === line; });
     if (breakpoints.length > 0) {
-      this.setBreakpoints(server, uri, breakpoints);
+      this.setBreakpoints(uri, breakpoints);
     } else {
-      this.removeBreakpoints(server, uri);
+      this.removeBreakpoints(uri);
     }
   }
 
@@ -158,24 +174,24 @@ export class MarkLogicService {
     return this.http.post(`/api/servers/${serverId}/invoke?uri=${uri}`, null);
   }
 
-  private setBreakpoints(server: string, uri, breakpoints: Array<Breakpoint>) {
-    let allBreakpoints = this.getAllBreakpoints(server);
+  private setBreakpoints(uri, breakpoints: Array<Breakpoint>) {
+    let allBreakpoints = this.getAllBreakpoints();
     allBreakpoints.set(uri, breakpoints);
-    this.saveBreakpoints(server, allBreakpoints);
+    this.saveBreakpoints(allBreakpoints);
   }
 
-  private removeBreakpoints(server: string, uri) {
-    let allBreakpoints = this.getAllBreakpoints(server);
+  private removeBreakpoints(uri) {
+    let allBreakpoints = this.getAllBreakpoints();
     allBreakpoints.delete(uri);
-    this.saveBreakpoints(server, allBreakpoints);
+    this.saveBreakpoints(allBreakpoints);
   }
 
 
-  private saveBreakpoints(server: string, breakpoints: Map<string, Array<Breakpoint>>) {
+  private saveBreakpoints(breakpoints: Map<string, Array<Breakpoint>>) {
     let serializeme = {};
     breakpoints.forEach((value, key) => {
       serializeme[key] = value;
     });
-    localStorage.setItem(`breakpoints-${server}`, JSON.stringify(serializeme));
+    localStorage.setItem(`breakpoints`, JSON.stringify(serializeme));
   }
 }

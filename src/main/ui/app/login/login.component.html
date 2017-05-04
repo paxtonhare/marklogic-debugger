@@ -48,6 +48,27 @@
           </mdl-menu>
         </div>
 
+        <div *ngIf="currentServer">
+          <p>Choose the Modules Database you want to use.</p>
+          <div>
+            <button class="current-server" mdl-button #modulesButton="mdlButton" (click)="modulesMenu.toggle($event, modulesButton)" mdl-ripple>
+              <span *ngIf="currentServer">{{currentModulesDb.name}}</span>
+              <span *ngIf="!currentServer">Choose one..</span>
+              <i class="fa fa-caret-down"></i>
+            </button>
+            <mdl-menu #modulesMenu="mdlMenu" mdl-menu-position="bottom-left">
+              <mdl-menu-item mdl-ripple (click)="selectModulesDb(database)" *ngFor="let database of modulesDbs">{{database.name}}</mdl-menu-item>
+            </mdl-menu>
+          </div>
+        </div>
+
+        <div *ngIf="currentModulesDb">
+          <p>Specify the root path of your Modules Database.</p>
+          <div>
+            <mdl-textfield label="Modules Root Path" floating-label type="text" [ngModel]="currentServer.root" (ngModelChange)="selectRootPath($event)" name="rootPath" md-autofocus required="required"></mdl-textfield>
+          </div>
+        </div>
+
         <button *ngIf="currentServer" id="start-debugging" type="submit"
           mdl-button mdl-button-type="raised" mdl-colored="primary" mdl-ripple
           (click)="startDebugging()">Start Debugging</button>

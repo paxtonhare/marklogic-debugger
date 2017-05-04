@@ -129,6 +129,13 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
 
       cursor: pointer;
 
+      &.expired {
+        cursor: initial;
+        &:hover {
+          background-color: inherit;
+        }
+      }
+
       .request-id {
         font-size: 60%;
       }
@@ -157,6 +164,12 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
   color: #333;
   padding: 10px;
   border-bottom: 1px solid #ccc;
+
+  /deep/ .mdl-button {
+    line-height: 24px;
+    height: 24px;
+    text-transform: initial;
+  }
 }
 
 /deep/ app-file-browser {
@@ -165,6 +178,10 @@ $hover-color: unquote("rgb(#{$palette-debugger-50})");
 
 .files {
   min-width: 250px;
+
+  .section-title {
+    position: relative;
+  }
 
   .section-body {
     display: flex;
@@ -245,9 +262,20 @@ ul.frames {
 
   li {
     padding: 5px;
+    margin-left: 10px;
     cursor: default;
     &:hover {
       background-color: $hover-color;
+    }
+
+    &.subheading {
+      margin-left: 0px;
+      font-weight: bold;
+      padding: 0px;
+
+      &:hover {
+        background-color: initial;
+      }
     }
 
     .fa-long-arrow-right {
@@ -269,10 +297,6 @@ ul.frames {
 
   .mdl-switch {
     width: initial;
-  }
-
-  .selected-server {
-    margin-right: 20px;
   }
 }
 
@@ -342,4 +366,18 @@ ul.frames {
 
 .console-buttons {
   float: right;
+}
+
+.file-viewer {
+  position: relative;
+
+  .list-title {
+    &:hover {
+      background-color: transparent;
+    }
+
+    cursor: initial;
+    font-size: 18px;
+    font-weight: bold;
+  }
 }

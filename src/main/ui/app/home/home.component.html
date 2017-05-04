@@ -2,8 +2,7 @@
   <mdl-layout-header>
     <mdl-layout-header-row>
       <mdl-layout-title>
-        <span class="server">http://{{hostname}}:{{port}}</span> &#x25CF;
-        <span class="selected-server" *ngIf="selectedServer">{{selectedServer.name}} </span>
+        <span class="server">http://{{hostname}}:{{port}}</span>
       </mdl-layout-title>
       <mdl-layout-spacer></mdl-layout-spacer>
       <button mdl-button #btn2="mdlButton" (click)="m2.toggle($event, btn2)" mdl-button-type="icon" mdl-ripple><mdl-icon>more_vert</mdl-icon></button>
@@ -18,24 +17,48 @@
     <div gm-grid>
       <div gm-row class="flex flex-70">
         <div gm-col class="flex flex-30 files">
-          <template [ngIf]="selectedServer">
-            <div class="section-title">
-              <span><strong>{{selectedServer.name}}</strong> Files</span>
+          <div class="section-title">
+            <div>
+              <span *ngIf="modulesDb">Files for DB: </span>
+              <button mdl-button #chooseModulesButton="mdlButton" (click)="chooseModulesMenu.toggle($event, chooseModulesButton)" mdl-ripple>
+                <span>{{currentModulesDb()}}</span>
+                <i class="fa fa-caret-down"></i>
+              </button>
+              <mdl-menu #chooseModulesMenu="mdlMenu" mdl-menu-position="bottom-left">
+                <mdl-menu-item mdl-ripple *ngFor="let database of modulesDatabases" (click)="selectModulesDb(database)">{{database.name}}</mdl-menu-item>
+              </mdl-menu>
             </div>
-            <div class="section-body">
-              <app-file-browser
-                [fileSets]="[serverFiles, systemFiles]"
-                [selectedUri]="currentUri"
-                (fileShown)="fileClicked($event.uri)"></app-file-browser>
+            <div *ngIf="modulesDb && modulesDb.id === '0'">
+              <span>Modules Root: </span>
+              <button mdl-button #chooseModulesRootButton="mdlButton" (click)="chooseModulesRootMenu.toggle($event, chooseModulesRootButton)" mdl-ripple>
+                <span>{{currentModulesRoot()}}</span>
+                <i class="fa fa-caret-down"></i>
+              </button>
+              <mdl-menu #chooseModulesRootMenu="mdlMenu" mdl-menu-position="bottom-left">
+                <mdl-menu-item mdl-ripple *ngFor="let root of modulesRoots" (click)="selectModulesRoot(root)">{{root}}</mdl-menu-item>
+              </mdl-menu>
             </div>
-          </template>
+          </div>
+          <div class="section-body">
+            <app-file-browser
+              [fileSets]="[serverFiles, systemFiles]"
+              [selectedUri]="currentUri"
+              (fileShown)="fileClicked($event.uri)"></app-file-browser>
+          </div>
         </div>
         <gm-divider></gm-divider>
         <div gm-col class="flex flex-70">
-          <div class="fill-height" *ngIf="currentUri">
-            <div class="section-title">
-              <span>File View: {{currentUri}}</span>
-              <span title="Debug this file on the server" class="invoke-module clickable" (click)="invokeModule(currentUri)"><mdl-icon>play_arrow</mdl-icon></span>
+          <div class="fill-height" *ngIf="fileText">
+            <div class="section-title file-viewer">
+              <template [ngIf]="currentUri">
+                <span>File View: {{currentUri}}</span>
+                <!-- <span title="Debug this file on the server" class="invoke-module clickable" (click)="invokeModule(currentUri)"><mdl-icon>play_arrow</mdl-icon></span> -->
+                <button mdl-button #runOnServerButton="mdlButton" (click)="runOnServerMenu.toggle($event, runOnServerButton)" mdl-button-type="icon" mdl-ripple><mdl-icon>play_arrow</mdl-icon></button>
+                <mdl-menu #runOnServerMenu="mdlMenu" mdl-menu-position="bottom-left">
+                  <mdl-menu-item class="list-title">Choose an Appserver to run against</mdl-menu-item>
+                  <mdl-menu-item *ngFor="let server of appServers" (click)="invokeModule(currentUri, server.id)">{{server.name}}</mdl-menu-item>
+                </mdl-menu>
+              </template>
             </div>
             <div class="section-body">
               <app-codemirror *ngIf="fileText"
@@ -54,7 +77,7 @@
       </div>
       <div gm-row class="flex flex-30 debug-area">
         <div gm-col class="flex flex-30 debugger">
-          <div class="disabled" *ngIf="!requestId">
+          <div class="disabled" *ngIf="!currentRequest">
             <span>DEBUG A REQUEST TO ENABLE</span>
           </div>
           <div class="section-title">
@@ -78,13 +101,16 @@
             </app-subsection>
             <app-subsection [title]="'Variables'">
               <ul *ngIf="hasVariables()" class="frames">
-                <template [ngIf]="stack.frames[currentStackPosition] && stack.frames[currentStackPosition].externalVariables">
+                <template [ngIf]="stack.frames[currentStackPosition] && stack.frames[currentStackPosition].externalVariables && stack.frames[currentStackPosition].externalVariables.length > 0">
+                  <li class="subheading">External Variables</li>
                   <li *ngFor="let variable of stack.frames[currentStackPosition].externalVariables">{{variable.name}}: {{variable.value}}</li>
                 </template>
-                <template [ngIf]="stack.frames[currentStackPosition] && stack.frames[currentStackPosition].globalVariables">
+                <template [ngIf]="stack.frames[currentStackPosition] && stack.frames[currentStackPosition].globalVariables && stack.frames[currentStackPosition].globalVariables.length > 0">
+                  <li class="subheading">Global Variables</li>
                   <li *ngFor="let variable of stack.frames[currentStackPosition].globalVariables">{{variable.name}}: {{variable.value}}</li>
                 </template>
                 <template [ngIf]="stack.frames[currentStackPosition] && stack.frames[currentStackPosition].variables">
+                  <li class="subheading">Local Variables</li>
                   <li *ngFor="let variable of stack.frames[currentStackPosition].variables">{{variable.name}}: {{variable.value}}</li>
                 </template>
               </ul>
@@ -125,18 +151,27 @@
           <div class="section-title">
             Requests <span class="clickable" (click)="getRequests()"><i class="fa fa-repeat"></i></span>
             <div class="debug-status">
-              <mdl-switch *ngIf="selectedServer" [(ngModel)]="selectedServer.connected" (change)="toggleConnected(selectedServer)" mdl-ripple></mdl-switch>
-              <span class="debug-status" *ngIf="selectedServer"> Auto-pause requests is <strong>{{selectedServer.connected ? 'ON' : 'OFF'}}</strong></span>
+              <span> Auto-pause requests ({{connectedServerCount()}}):</span>
+              <button mdl-button #autoPauseButton="mdlButton" (click)="autoPauseMenu.toggle($event, autoPauseButton)" mdl-button-type="icon" mdl-ripple><mdl-icon>more_vert</mdl-icon></button>
+              <mdl-menu #autoPauseMenu="mdlMenu" mdl-menu-position="top-right">
+                <mdl-menu-item *ngFor="let server of appServers">
+                  <mdl-switch [(ngModel)]="server.connected" (change)="toggleConnected(server)" mdl-ripple></mdl-switch>
+                  <span> {{server.name}}</span>
+                </mdl-menu-item>
+              </mdl-menu>
             </div>
           </div>
           <div class="section-body">
             <p *ngIf="!requests || requests.length === 0">No Requests stopped</p>
             <ul *ngIf="requests && requests.length > 0">
-              <li *ngFor="let request of requests" (click)="debugRequest(request.requestId)">
-                <i class="fa fa-long-arrow-right" *ngIf="requestId === request.requestId"></i>
-                {{getRequestName(request)}} <span class="request-id">({{request.requestId}})</span>
-                <span *ngIf="request.debuggingStatus === 'attached'" class="clickable" title="continue" (click)="continueRequest(request.requestId)"><mdl-icon>play_arrow</mdl-icon></span>
-                <span *ngIf="request.debuggingStatus !== 'attached'" class="clickable" title="pause" (click)="pauseRequest(request.requestId)"><mdl-icon>pause</mdl-icon></span>
+              <li *ngFor="let request of requests" [ngClass]="{'expired' : request.isExpired}" [title]="getRequestName(request)" (click)="debugRequest(request)">
+                <i class="fa fa-hourglass-o" *ngIf="request.isExpired"></i>
+                <i class="fa fa-long-arrow-right" *ngIf="currentRequest && currentRequest.requestId === request.requestId"></i>
+                {{getRequestName(request) | truncate:30}}
+                <span *ngIf="request.isExpired" class="request-id">(Request Expired!)</span>
+                <span *ngIf="!request.isExpired" class="request-id">({{request.requestId}})</span>
+                <span *ngIf="request.debuggingStatus === 'attached'" class="clickable" title="continue" (click)="continueRequest(request.requestId, $event)"><mdl-icon>play_arrow</mdl-icon></span>
+                <span *ngIf="request.debuggingStatus !== 'attached'" class="clickable" title="pause" (click)="pauseRequest(request.requestId, $event)"><mdl-icon>pause</mdl-icon></span>
               </li>
             </ul>
           </div>
